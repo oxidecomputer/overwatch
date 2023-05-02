@@ -15,8 +15,6 @@ dlpi = { git = "https://github.com/oxidecomputer/dlpi-sys", version = "0.2.0" }
 hex = "0.4.3"
 macaddr = "1.0.1"
 num_enum = "0.6.1"
-#p4-macro = { git = "https://github.com/oxidecomputer/p4", branch = "ry-dev" }
-#p4rs = { git = "https://github.com/oxidecomputer/p4", branch = "ry-dev" }
-p4-macro = { path = "/home/ry/src/p4/lang/p4-macro" }
-p4rs = { path = "/home/ry/src/p4/lang/p4rs" }
+p4-macro = { git = "https://github.com/oxidecomputer/p4", branch = "ry-dev" }
+p4rs = { git = "https://github.com/oxidecomputer/p4", branch = "ry-dev" }
 usdt = "0.3.5"

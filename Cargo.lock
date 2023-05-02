@@ -13,9 +13,9 @@ dependencies = [
 
 [[package]]
 name = "anstream"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6342bd4f5a1205d7f41e94a41a901f5647c938cdfa96036338e8533c9d6c2450"
+checksum = "0ca84f3628370c59db74ee214b3263d58f9aadd9b4fe7e711fd87dc452b7f163"
 dependencies = [
  "anstyle",
  "anstyle-parse",
@@ -142,9 +142,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "clap"
-version = "4.2.5"
+version = "4.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a1f23fa97e1d1641371b51f35535cb26959b8e27ab50d167a8b996b5bada819"
+checksum = "34d21f9bf1b425d2968943631ec91202fe5e837264063503708b83013f8fc938"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -153,9 +153,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.2.5"
+version = "4.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fdc5d93c358224b4d6867ef1356d740de2303e9892edc06c5340daeccd96bab"
+checksum = "914c8c79fb560f238ef6429439a30023c862f7a28e688c58f7203f12b29970bd"
 dependencies = [
  "anstream",
  "anstyle",
@@ -701,6 +701,7 @@ dependencies = [
 [[package]]
 name = "p4"
 version = "0.1.0"
+source = "git+https://github.com/oxidecomputer/p4?branch=ry-dev#861918017d9e7cc8eab803c451997ffbdd3b0c89"
 dependencies = [
  "colored",
  "regex",
@@ -709,6 +710,7 @@ dependencies = [
 [[package]]
 name = "p4-macro"
 version = "0.1.0"
+source = "git+https://github.com/oxidecomputer/p4?branch=ry-dev#861918017d9e7cc8eab803c451997ffbdd3b0c89"
 dependencies = [
  "p4",
  "p4-rust",
@@ -721,6 +723,7 @@ dependencies = [
 [[package]]
 name = "p4-rust"
 version = "0.1.0"
+source = "git+https://github.com/oxidecomputer/p4?branch=ry-dev#861918017d9e7cc8eab803c451997ffbdd3b0c89"
 dependencies = [
  "p4",
  "prettyplease",
@@ -733,6 +736,7 @@ dependencies = [
 [[package]]
 name = "p4rs"
 version = "0.1.0"
+source = "git+https://github.com/oxidecomputer/p4?branch=ry-dev#861918017d9e7cc8eab803c451997ffbdd3b0c89"
 dependencies = [
  "bitvec",
  "colored",
@@ -1614,9 +1618,9 @@ checksum = "1a515f5799fe4961cb532f983ce2b23082366b898e52ffbce459c86f67c8378a"
 
 [[package]]
 name = "winnow"
-version = "0.4.4"
+version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5617da7e1f97bf363947d767b91aaf3c2bbc19db7fda9c65af1278713d58e0a2"
+checksum = "61de7bac303dc551fe038e2b3cef0f571087a47571ea6e79a87692ac99b99699"
 dependencies = [
  "memchr",
 ]
