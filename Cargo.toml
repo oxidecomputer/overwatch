@@ -1,0 +1,22 @@
+[package]
+name = "overwatch"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anstyle = "1.0.0"
+anyhow = "1.0.71"
+bitvec = "1.0.1"
+clap = { version = "4.2.5", features = ["derive", "unstable-styles"] }
+colored = "2.0.0"
+dlpi = { git = "https://github.com/oxidecomputer/dlpi-sys", version = "0.2.0" }
+hex = "0.4.3"
+macaddr = "1.0.1"
+num_enum = "0.6.1"
+#p4-macro = { git = "https://github.com/oxidecomputer/p4", branch = "ry-dev" }
+#p4rs = { git = "https://github.com/oxidecomputer/p4", branch = "ry-dev" }
+p4-macro = { path = "/home/ry/src/p4/lang/p4-macro" }
+p4rs = { path = "/home/ry/src/p4/lang/p4rs" }
+usdt = "0.3.5"
