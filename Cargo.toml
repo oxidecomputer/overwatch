@@ -17,4 +17,5 @@ macaddr = "1.0.1"
 num_enum = "0.6.1"
 p4-macro = { git = "https://github.com/oxidecomputer/p4", branch = "ry-dev" }
 p4rs = { git = "https://github.com/oxidecomputer/p4", branch = "ry-dev" }
+pretty-hex = "0.3.0"
 usdt = "0.3.5"

@@ -276,7 +276,7 @@ dependencies = [
  "libc",
  "libdlpi-sys",
  "num_enum 0.5.11",
- "pretty-hex",
+ "pretty-hex 0.2.1",
  "thiserror",
  "tokio",
 ]
@@ -695,6 +695,7 @@ dependencies = [
  "num_enum 0.6.1",
  "p4-macro",
  "p4rs",
+ "pretty-hex 0.3.0",
  "usdt 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -828,6 +829,12 @@ name = "pretty-hex"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bc5c99d529f0d30937f6f4b8a86d988047327bb88d04d2c4afc356de74722131"
+
+[[package]]
+name = "pretty-hex"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c6fa0831dd7cc608c38a5e323422a0077678fa5744aa2be4ad91c4ece8eec8d5"
 
 [[package]]
 name = "prettyplease"

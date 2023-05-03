@@ -30,7 +30,7 @@ pub fn run(s: &Snoop) -> Result<()> {
         let mut pkt = packet_in::new(&msg[..n]);
         let hdrs = pipeline.process_packet_headers(0, &mut pkt);
         for (h, _) in hdrs {
-            dump::headers(h, n);
+            dump::frame(h, &msg[..n], s.hex);
         }
     }
 }

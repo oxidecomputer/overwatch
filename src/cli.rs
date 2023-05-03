@@ -48,6 +48,10 @@ pub struct Snoop {
     /// The data link to snoop.
     pub link: String,
 
+    /// Dump Ethernet frame in hex format.
+    #[arg(long)]
+    pub hex: bool,
+
     /// Filter on the provided source IPs.
     #[arg(long)]
     pub ip_src: Vec<IpAddr>,

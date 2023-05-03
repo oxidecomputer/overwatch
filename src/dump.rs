@@ -3,6 +3,7 @@ use bitvec::prelude::*;
 use colored::Colorize;
 use macaddr::MacAddr6;
 use num_enum::TryFromPrimitive;
+use pretty_hex::*;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
 pub fn bv_to_mac(bv: BitVec<u8, Msb0>) -> Result<MacAddr6> {
@@ -430,6 +431,22 @@ pub fn sep() {
     println!("{}", "=====|".dimmed());
 }
 
+pub fn frame(h: crate::headers_t, frame: &[u8], dump_hex: bool) {
+    headers(h, frame.len());
+    if dump_hex {
+        let cfg = HexConfig {
+            title: false,
+            width: 16,
+            chunk: 2,
+            ..HexConfig::default()
+        };
+        let dump = format!("-----| {:?}", frame.hex_conf(cfg));
+        let dump = dump.replace('\n', "\n     | ");
+        println!("{}", dump.dimmed());
+    }
+    sep();
+}
+
 pub fn headers(h: crate::headers_t, frame_len: usize) {
     if h.ethernet.isValid() {
         ethernet(h.ethernet, Some(frame_len));
@@ -475,7 +492,6 @@ pub fn headers(h: crate::headers_t, frame_len: usize) {
     if h.inner_udp.isValid() {
         udp(h.inner_udp);
     }
-    sep();
 }
 
 macro_rules! field {
