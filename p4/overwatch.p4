@@ -12,15 +12,14 @@ SoftNPU(
 ) main;
 
 control eth(
-    inout headers_t hdr,
-    inout ingress_metadata_t ingress,
+    inout ethernet_h ethernet,
     inout egress_metadata_t egress,
 ) {
     action keep() { egress.port = 16w1; }
     action drop() { egress.drop = true; }
 
     table ethertype {
-        key = { hdr.ethernet.ether_type: ternary; }
+        key = { ethernet.ether_type: ternary; }
         actions = { keep; drop; }
         default_action = NoAction;
     }
@@ -31,21 +30,35 @@ control eth(
 }
 
 control ipv4(
-    inout headers_t hdr,
-    inout ingress_metadata_t ingress,
+    inout ipv4_h ipv4,
     inout egress_metadata_t egress,
 ) {
     action keep() { egress.port = 16w1; }
     action drop() { egress.drop = true; }
 
     table src {
-        key = { hdr.ipv4.src: ternary; }
+        key = { ipv4.src: ternary; }
         actions = { keep; drop; }
         default_action = NoAction;
     }
 
     table dst {
-        key = { hdr.ipv4.dst: ternary; }
+        key = { ipv4.dst: ternary; }
+        actions = { keep; drop; }
+        default_action = NoAction;
+    }
+
+    table host {
+        key = { 
+            ipv4.src: ternary; 
+            ipv4.dst: ternary; 
+        }
+        actions = { keep; drop; }
+        default_action = NoAction;
+    }
+
+    table proto {
+        key = { ipv4.protocol: ternary; }
         actions = { keep; drop; }
         default_action = NoAction;
     }
@@ -53,25 +66,41 @@ control ipv4(
     apply {
         src.apply();
         dst.apply();
+        host.apply();
+        proto.apply();
     }
 }
 
 control ipv6(
-    inout headers_t hdr,
-    inout ingress_metadata_t ingress,
+    inout ipv6_h ipv6,
     inout egress_metadata_t egress,
 ) {
     action keep() { egress.port = 16w1; }
     action drop() { egress.drop = true; }
 
     table src {
-        key = { hdr.ipv6.src: ternary; }
+        key = { ipv6.src: ternary; }
         actions = { keep; drop; }
         default_action = NoAction;
     }
 
     table dst {
-        key = { hdr.ipv6.dst: ternary; }
+        key = { ipv6.dst: ternary; }
+        actions = { keep; drop; }
+        default_action = NoAction;
+    }
+
+    table host {
+        key = { 
+            ipv6.src: ternary; 
+            ipv6.dst: ternary; 
+        }
+        actions = { keep; drop; }
+        default_action = NoAction;
+    }
+
+    table proto {
+        key = { ipv6.next_hdr: ternary; }
         actions = { keep; drop; }
         default_action = NoAction;
     }
@@ -79,6 +108,28 @@ control ipv6(
     apply {
         src.apply();
         dst.apply();
+        host.apply();
+        proto.apply();
+    }
+}
+
+control app(
+    in bit<8> alp,
+    inout egress_metadata_t egress,
+) {
+    action keep() { egress.port = 16w1; }
+    action drop() { egress.drop = true; }
+
+    table proto {
+        key = {
+            alp: ternary;
+        }
+        actions = { keep; drop; }
+        default_action = NoAction;
+    }
+
+    apply {
+        proto.apply();
     }
 }
 
@@ -90,19 +141,32 @@ control ingress(
     eth() eth;
     ipv4() ipv4;
     ipv6() ipv6;
+    eth() inner_eth;
+    ipv4() inner_ipv4;
+    ipv6() inner_ipv6;
+    app() app;
+    app() inner_app;
 
     apply {
         egress.port = 16w1;
 
         if (hdr.ethernet.isValid()) {
-            eth.apply(hdr, ingress, egress);
+            eth.apply(hdr.ethernet, egress);
         }
         if (hdr.ipv4.isValid()) {
-            ipv4.apply(hdr, ingress, egress);
+            ipv4.apply(hdr.ipv4, egress);
         }
         if (hdr.ipv6.isValid()) {
-            ipv6.apply(hdr, ingress, egress);
+            ipv6.apply(hdr.ipv6, egress);
         }
+        if(hdr.inner_ipv4.isValid()) {
+            inner_ipv4.apply(hdr.inner_ipv4, egress);
+        }
+        if(hdr.inner_ipv6.isValid()) {
+            inner_ipv6.apply(hdr.inner_ipv6, egress);
+        }
+        app.apply(ingress.alp, egress);
+        inner_app.apply(ingress.inner_alp, egress);
     }
 }
 

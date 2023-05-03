@@ -1,3 +1,9 @@
+// Application layer protocol identifirs
+#define ALP_GENEVE  8w0x1
+#define ALP_DDM     8w0x2
+#define ALP_BGP     8w0x3
+#define ALP_HTTP    8w0x4
+
 parser parse(
     packet_in pkt,
     out headers_t hdr,
@@ -84,6 +90,7 @@ parser parse(
 
     state geneve {
         pkt.extract(hdr.geneve);
+        ingress.alp = ALP_GENEVE;
         transition inner_eth;
     }
 

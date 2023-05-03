@@ -50,154 +50,168 @@ pub enum Ethertype {
     Ethernet = 0x6558,
 }
 
-#[allow(clippy::upper_case_acronyms)]
-#[derive(Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive)]
+#[derive(
+    Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive, clap::ValueEnum,
+)]
 #[repr(u8)]
 pub enum IpProto {
-    IPv6HeaderHopByHop = 0,
-    ICMP = 1,
-    IGMP = 2,
-    GGP = 3,
-    IPv4 = 4,
-    Stream = 5,
-    TCP = 6,
-    CBT = 7,
-    EGP = 8,
-    IGP = 9,
-    BbnRccMon = 10,
-    NvpII = 11,
-    PUP = 12,
-    Argus = 13,
-    Emcon = 14,
-    Xnet = 15,
-    Chaos = 16,
-    UDP = 17,
-    Mux = 18,
-    DcnMeas = 19,
-    Hmp = 20,
-    Prm = 21,
-    XnsIdp = 22,
-    Trunk1 = 23,
-    Trunk2 = 24,
-    Leaf1 = 25,
-    Leaf2 = 26,
-    RDP = 27,
-    Irtp = 28,
-    IsoTp4 = 29,
-    NetBlt = 30,
-    MfeNsp = 31,
-    MeritInp = 32,
-    DCCP = 33,
-    ThirdPartyConnectProtocol = 34,
-    Idpr = 35,
-    Xtp = 36,
-    Ddp = 37,
-    IdprCmtp = 38,
-    TpPlusPlus = 39,
-    Il = 40,
-    IPv6 = 41,
-    Sdrp = 42,
-    IPv6RouteHeader = 43,
-    IPv6FragmentationHeader = 44,
-    Idrp = 45,
-    RSVP = 46,
-    GRE = 47,
-    DSR = 48,
-    BNA = 49,
-    EncapsulatingSecurityPayload = 50,
-    AuthenticationHeader = 51,
-    INLSP = 52,
-    Swipe = 53,
-    NARP = 54,
-    Mobile = 55,
-    TLSP = 56,
-    Skip = 57,
-    ICMP6 = 58,
-    IPv6NoNextHeader = 59,
-    IPv6DestinationOptions = 60,
-    AnyHostInternalProtocol = 61,
-    CFTP = 62,
-    AnyLocalNetwork = 63,
-    SatExpak = 64,
-    Krytolan = 65,
-    RVD = 66,
-    IPPC = 67,
-    AnyDistributedFileSystem = 68,
-    SatMon = 69,
-    Visa = 70,
-    IPCV = 71,
-    CPNX = 72,
-    CPHB = 73,
-    WSN = 74,
-    PVP = 75,
-    BrSatMon = 76,
-    SunNd = 77,
-    WbMon = 78,
-    WbExpak = 79,
-    IsoIp = 80,
-    VMTP = 81,
-    SecureVmtp = 82,
-    Vines = 83,
-    TtpOrIptm = 84,
-    NsfnetIgp = 85,
-    DGP = 86,
-    TCF = 87,
-    EIGRP = 88,
-    Ospfigp = 89,
-    SpriteRpc = 90,
-    LARP = 91,
-    MTP = 92,
-    AX25 = 93,
-    IPIP = 94,
-    MICP = 95,
-    SccSp = 96,
-    EtherIp = 97,
-    Encap = 98,
-    GMTP = 100,
-    IFMP = 101,
-    PNNI = 102,
-    PIM = 103,
-    ARIS = 104,
-    SCPS = 105,
-    QNX = 106,
-    ActiveNetworks = 107,
-    IpComp = 108,
-    SitraNetworksProtocol = 109,
-    CompaqPeer = 110,
-    IpxInIp = 111,
-    VRRP = 112,
-    PGM = 113,
-    AnyZeroHopProtocol = 114,
-    Layer2TunnelingProtocol = 115,
-    DDX = 116,
-    IATP = 117,
-    STP = 118,
-    SRP = 119,
-    UTI = 120,
-    SimpleMessageProtocol = 121,
-    SM = 122,
-    PTP = 123,
-    IsisOverIpv4 = 124,
-    Fire = 125,
-    CRTP = 126,
-    Crudp = 127,
-    Sscopmce = 128,
-    IPLT = 129,
-    SPS = 130,
-    Pipe = 131,
-    SCTP = 132,
-    FC = 133,
-    RsvpE2eIgnore = 134,
-    MobilityHeader = 135,
-    UDPLite = 136,
-    MPLSInIp = 137,
-    Manet = 138,
-    HIP = 139,
-    Shim6 = 140,
-    WESP = 141,
-    ROHC = 142,
-    ExperimentalAndTesting0 = 253,
-    ExperimentalAndTesting1 = 254,
+    Ipv6Hbh = 0,
+    Icmp = 1,
+    Igmp = 2,
+    //GGP = 3,
+    Ipv4 = 4,
+    //Stream = 5,
+    Tcp = 6,
+    //CBT = 7,
+    Egp = 8,
+    Igp = 9,
+    //BbnRccMon = 10,
+    //NvpII = 11,
+    //PUP = 12,
+    //Argus = 13,
+    //Emcon = 14,
+    //Xnet = 15,
+    //Chaos = 16,
+    Udp = 17,
+    //Mux = 18,
+    //DcnMeas = 19,
+    //Hmp = 20,
+    //Prm = 21,
+    //XnsIdp = 22,
+    //Trunk1 = 23,
+    //Trunk2 = 24,
+    //Leaf1 = 25,
+    //Leaf2 = 26,
+    //RDP = 27,
+    //Irtp = 28,
+    //IsoTp4 = 29,
+    //NetBlt = 30,
+    //MfeNsp = 31,
+    //MeritInp = 32,
+    //DCCP = 33,
+    //ThirdPartyConnectProtocol = 34,
+    //Idpr = 35,
+    //Xtp = 36,
+    //Ddp = 37,
+    //IdprCmtp = 38,
+    //TpPlusPlus = 39,
+    //Il = 40,
+    Ipv6 = 41,
+    //Sdrp = 42,
+    Ipv6Rth = 43,
+    Ipv6Frag = 44,
+    //Idrp = 45,
+    //RSVP = 46,
+    Gre = 47,
+    //DSR = 48,
+    //BNA = 49,
+    //EncapsulatingSecurityPayload = 50,
+    //AuthenticationHeader = 51,
+    //INLSP = 52,
+    //Swipe = 53,
+    //NARP = 54,
+    //Mobile = 55,
+    //TLSP = 56,
+    //Skip = 57,
+    Icmp6 = 58,
+    Ipv6NoNext = 59,
+    Ipv6DstOpt = 60,
+    //AnyHostInternalProtocol = 61,
+    //CFTP = 62,
+    //AnyLocalNetwork = 63,
+    //SatExpak = 64,
+    //Krytolan = 65,
+    //RVD = 66,
+    //IPPC = 67,
+    //AnyDistributedFileSystem = 68,
+    //SatMon = 69,
+    //Visa = 70,
+    //IPCV = 71,
+    //CPNX = 72,
+    //CPHB = 73,
+    //WSN = 74,
+    //PVP = 75,
+    //BrSatMon = 76,
+    //SunNd = 77,
+    //WbMon = 78,
+    //WbExpak = 79,
+    //IsoIp = 80,
+    //VMTP = 81,
+    //SecureVmtp = 82,
+    //Vines = 83,
+    //TtpOrIptm = 84,
+    //NsfnetIgp = 85,
+    //DGP = 86,
+    //TCF = 87,
+    Eigrp = 88,
+    //Ospfigp = 89,
+    //SpriteRpc = 90,
+    //LARP = 91,
+    //MTP = 92,
+    //AX25 = 93,
+    //IPIP = 94,
+    //MICP = 95,
+    //SccSp = 96,
+    //EtherIp = 97,
+    //Encap = 98,
+    //GMTP = 100,
+    //IFMP = 101,
+    //PNNI = 102,
+    //PIM = 103,
+    //ARIS = 104,
+    //SCPS = 105,
+    //QNX = 106,
+    //ActiveNetworks = 107,
+    //IpComp = 108,
+    //SitraNetworksProtocol = 109,
+    //CompaqPeer = 110,
+    //IpxInIp = 111,
+    Vrrp = 112,
+    //PGM = 113,
+    //AnyZeroHopProtocol = 114,
+    //Layer2TunnelingProtocol = 115,
+    //DDX = 116,
+    //IATP = 117,
+    Stp = 118,
+    //SRP = 119,
+    //UTI = 120,
+    //SimpleMessageProtocol = 121,
+    //SM = 122,
+    Ptp = 123,
+    //IsisOverIpv4 = 124,
+    //Fire = 125,
+    //CRTP = 126,
+    //Crudp = 127,
+    //Sscopmce = 128,
+    //IPLT = 129,
+    //SPS = 130,
+    //Pipe = 131,
+    Sctp = 132,
+    //FC = 133,
+    //RsvpE2eIgnore = 134,
+    //MobilityHeader = 135,
+    //UDPLite = 136,
+    //MPLSInIp = 137,
+    //Manet = 138,
+    //HIP = 139,
+    //Shim6 = 140,
+    //WESP = 141,
+    //ROHC = 142,
+    //ExperimentalAndTesting0 = 253,
+    //ExperimentalAndTesting1 = 254,
+}
+
+//NOTE the following must stay in sync with p4/parse.p4
+/// Application layer protocol
+#[derive(
+    Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive, clap::ValueEnum,
+)]
+#[repr(u8)]
+pub enum Alp {
+    Geneve = 0x1,
+    Ddm = 0x2,
+    Bgp = 0x3,
+    Http = 0x4,
 }
 
 #[allow(clippy::upper_case_acronyms)]
@@ -416,9 +430,9 @@ pub fn sep() {
     println!("{}", "=====|".dimmed());
 }
 
-pub fn headers(h: crate::headers_t) {
+pub fn headers(h: crate::headers_t, frame_len: usize) {
     if h.ethernet.isValid() {
-        ethernet(h.ethernet);
+        ethernet(h.ethernet, Some(frame_len));
     }
     if h.ipv4.isValid() {
         ipv4(h.ipv4);
@@ -442,7 +456,7 @@ pub fn headers(h: crate::headers_t) {
         println!("{}", "-----|".dimmed());
     }
     if h.inner_eth.isValid() {
-        ethernet(h.inner_eth);
+        ethernet(h.inner_eth, None);
     }
     if h.inner_ipv4.isValid() {
         ipv4(h.inner_ipv4);
@@ -487,7 +501,7 @@ macro_rules! from_to {
     };
 }
 
-pub fn ethernet(h: crate::ethernet_h) {
+pub fn ethernet(h: crate::ethernet_h, frame_len: Option<usize>) {
     let Ok(dst) = bv_to_mac(h.dst) else { return };
     let Ok(src) = bv_to_mac(h.src) else { return };
     let et: u16 = h.ether_type.load_le();
@@ -495,12 +509,17 @@ pub fn ethernet(h: crate::ethernet_h) {
         Ok(h) => format!("{:?}", h).green(),
         _ => format!("0x{:04x}", et).green(),
     };
-    println!(
+    print!(
         "{} {} {}",
         layer!("Eth"),
         from_to!(src, dst),
         field!("et", et),
     );
+    if let Some(n) = frame_len {
+        println!(" {}", field!("len", n));
+    } else {
+        println!()
+    }
 }
 
 pub fn ipv4(h: crate::ipv4_h) {
@@ -653,26 +672,36 @@ pub fn icmp(h: crate::icmp_h) {
     let (typ, code) = match IcmpType::try_from(typ) {
         Ok(h) => {
             let code = match h {
-                IcmpType::DestinationUnreachable => match IcmpDUCode::try_from(code) {
-                    Ok(h) => format!("{:?}", h),
-                    _ => format!("{}", typ),
-                },
-                IcmpType::Redirect => match IcmpRedirectMessageCode::try_from(code) {
-                    Ok(h) => format!("{:?}", h),
-                    _ => format!("{}", typ),
-                },
-                IcmpType::TimeExceeded => match IcmpTimeExceededCode::try_from(code) {
-                    Ok(h) => format!("{:?}", h),
-                    _ => format!("{}", typ),
-                },
-                IcmpType::ParameterProblem => match IcmpParameterProblemCode::try_from(code) {
-                    Ok(h) => format!("{:?}", h),
-                    _ => format!("{}", typ),
-                },
-                IcmpType::ExtendedEchoReply => match IcmpExtendedEchoReplyCode::try_from(code) {
-                    Ok(h) => format!("{:?}", h),
-                    _ => format!("{}", typ),
-                },
+                IcmpType::DestinationUnreachable => {
+                    match IcmpDUCode::try_from(code) {
+                        Ok(h) => format!("{:?}", h),
+                        _ => format!("{}", typ),
+                    }
+                }
+                IcmpType::Redirect => {
+                    match IcmpRedirectMessageCode::try_from(code) {
+                        Ok(h) => format!("{:?}", h),
+                        _ => format!("{}", typ),
+                    }
+                }
+                IcmpType::TimeExceeded => {
+                    match IcmpTimeExceededCode::try_from(code) {
+                        Ok(h) => format!("{:?}", h),
+                        _ => format!("{}", typ),
+                    }
+                }
+                IcmpType::ParameterProblem => {
+                    match IcmpParameterProblemCode::try_from(code) {
+                        Ok(h) => format!("{:?}", h),
+                        _ => format!("{}", typ),
+                    }
+                }
+                IcmpType::ExtendedEchoReply => {
+                    match IcmpExtendedEchoReplyCode::try_from(code) {
+                        Ok(h) => format!("{:?}", h),
+                        _ => format!("{}", typ),
+                    }
+                }
                 _ => format!("{}", code),
             };
             (format!("{:?}", h), code)
@@ -697,22 +726,30 @@ pub fn icmp6(h: crate::icmp_h) {
     let (typ, code) = match Icmp6Type::try_from(typ) {
         Ok(h) => {
             let code = match h {
-                Icmp6Type::DestinationUnreachable => match Icmp6DUCode::try_from(code) {
-                    Ok(h) => format!("{:?}", h),
-                    _ => format!("{}", typ),
-                },
-                Icmp6Type::TimeExceeded => match Icmp6TimeExceededCode::try_from(code) {
-                    Ok(h) => format!("{:?}", h),
-                    _ => format!("{}", typ),
-                },
-                Icmp6Type::ParameterProblem => match Icmp6ParameterProblemCode::try_from(code) {
-                    Ok(h) => format!("{:?}", h),
-                    _ => format!("{}", typ),
-                },
-                Icmp6Type::RouterRenumbering => match Icmp6RouterRenumberingCode::try_from(code) {
-                    Ok(h) => format!("{:?}", h),
-                    _ => format!("{}", typ),
-                },
+                Icmp6Type::DestinationUnreachable => {
+                    match Icmp6DUCode::try_from(code) {
+                        Ok(h) => format!("{:?}", h),
+                        _ => format!("{}", typ),
+                    }
+                }
+                Icmp6Type::TimeExceeded => {
+                    match Icmp6TimeExceededCode::try_from(code) {
+                        Ok(h) => format!("{:?}", h),
+                        _ => format!("{}", typ),
+                    }
+                }
+                Icmp6Type::ParameterProblem => {
+                    match Icmp6ParameterProblemCode::try_from(code) {
+                        Ok(h) => format!("{:?}", h),
+                        _ => format!("{}", typ),
+                    }
+                }
+                Icmp6Type::RouterRenumbering => {
+                    match Icmp6RouterRenumberingCode::try_from(code) {
+                        Ok(h) => format!("{:?}", h),
+                        _ => format!("{}", typ),
+                    }
+                }
                 Icmp6Type::ICMPNodeInformationQuery => {
                     match Icmp6NodeInformationQueryCode::try_from(code) {
                         Ok(h) => format!("{:?}", h),
