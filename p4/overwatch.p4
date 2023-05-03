@@ -141,15 +141,17 @@ control ingress(
     eth() eth;
     ipv4() ipv4;
     ipv6() ipv6;
+    app() app;
+
     eth() inner_eth;
     ipv4() inner_ipv4;
     ipv6() inner_ipv6;
-    app() app;
     app() inner_app;
 
     apply {
         egress.port = 16w1;
 
+        // outer
         if (hdr.ethernet.isValid()) {
             eth.apply(hdr.ethernet, egress);
         }
@@ -159,13 +161,18 @@ control ingress(
         if (hdr.ipv6.isValid()) {
             ipv6.apply(hdr.ipv6, egress);
         }
+        app.apply(ingress.alp, egress);
+
+        // inner
+        if (hdr.inner_eth.isValid()) {
+            inner_eth.apply(hdr.inner_eth, egress);
+        }
         if(hdr.inner_ipv4.isValid()) {
             inner_ipv4.apply(hdr.inner_ipv4, egress);
         }
         if(hdr.inner_ipv6.isValid()) {
             inner_ipv6.apply(hdr.inner_ipv6, egress);
         }
-        app.apply(ingress.alp, egress);
         inner_app.apply(ingress.inner_alp, egress);
     }
 }
