@@ -3,6 +3,7 @@ use bitvec::prelude::*;
 use colored::Colorize;
 use macaddr::MacAddr6;
 use num_enum::TryFromPrimitive;
+use p4rs::Header;
 use pretty_hex::*;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
@@ -49,6 +50,13 @@ pub enum Ethertype {
     QnQ = 0x9100,
     Sidecar = 0x901,
     Ethernet = 0x6558,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive)]
+#[repr(u8)]
+pub enum DdmRouterKind {
+    Server,
+    Transit,
 }
 
 #[derive(
@@ -210,9 +218,10 @@ pub enum IpProto {
 #[repr(u8)]
 pub enum Alp {
     Geneve = 0x1,
-    Ddm = 0x2,
-    Bgp = 0x3,
-    Http = 0x4,
+    Bgp = 0x2,
+    Http = 0x3,
+    DdmDiscovery = 0x4,
+    DdmExchange = 0x5,
 }
 
 #[allow(clippy::upper_case_acronyms)]
@@ -432,7 +441,7 @@ pub fn sep() {
 }
 
 pub fn frame(h: crate::headers_t, frame: &[u8], dump_hex: bool) {
-    headers(h, frame.len());
+    headers(h, frame);
     if dump_hex {
         let cfg = HexConfig {
             title: false,
@@ -447,50 +456,79 @@ pub fn frame(h: crate::headers_t, frame: &[u8], dump_hex: bool) {
     sep();
 }
 
-pub fn headers(h: crate::headers_t, frame_len: usize) {
+macro_rules! hlen {
+    ($hdr:tt) => {
+        crate::$hdr::size() >> 3
+    };
+}
+
+pub fn headers(h: crate::headers_t, frame: &[u8]) {
+    let mut off = 0usize;
     if h.ethernet.isValid() {
-        ethernet(h.ethernet, Some(frame_len));
+        ethernet(h.ethernet, Some(frame.len()));
+        off += hlen!(ethernet_h);
     }
     if h.ipv4.isValid() {
+        let ihl: u8 = h.inner_ipv4.ihl.load();
         ipv4(h.ipv4);
+        off += (ihl << 2) as usize;
         if h.icmp.isValid() {
             icmp(h.icmp);
+            off += hlen!(icmp_h);
         }
     } else if h.ipv6.isValid() {
         ipv6(h.ipv6);
         if h.icmp.isValid() {
             icmp6(h.icmp);
+            off += hlen!(icmp_h);
         }
+        off += hlen!(ipv6_h);
     }
     if h.tcp.isValid() {
+        let len: u8 = h.tcp.data_offset.load();
         tcp(h.tcp);
+        off += (len << 2) as usize;
     }
     if h.udp.isValid() {
         udp(h.udp);
+        off += hlen!(udp_h);
+    }
+    if h.ddm_discovery.isValid() {
+        ddm_discovery(h.ddm_discovery, &frame[off..]);
+        off += hlen!(ddm_discovery_h);
     }
     if h.geneve.isValid() {
         geneve(h.geneve);
         println!("{}", "-----|".dimmed());
+        off += hlen!(geneve_h);
     }
     if h.inner_eth.isValid() {
         ethernet(h.inner_eth, None);
     }
     if h.inner_ipv4.isValid() {
+        let ihl: u8 = h.inner_ipv4.ihl.load();
         ipv4(h.inner_ipv4);
+        off += (ihl << 2) as usize;
         if h.inner_icmp.isValid() {
             icmp(h.inner_icmp);
+            off += hlen!(icmp_h);
         }
     } else if h.inner_ipv6.isValid() {
         ipv6(h.inner_ipv6);
         if h.inner_icmp.isValid() {
             icmp6(h.inner_icmp);
+            off += hlen!(icmp_h);
         }
     }
     if h.inner_tcp.isValid() {
+        let len: u8 = h.inner_tcp.data_offset.load();
         tcp(h.inner_tcp);
+        off += (len << 2) as usize;
     }
+    #[allow(unused_assignments)]
     if h.inner_udp.isValid() {
         udp(h.inner_udp);
+        off += hlen!(udp_h);
     }
 }
 
@@ -792,6 +830,37 @@ pub fn icmp6(h: crate::icmp_h) {
         field!("type", typ),
         field!("code", code),
         field!("chk", chk),
+    );
+}
+
+pub fn ddm_discovery(h: crate::ddm_discovery_h, frame: &[u8]) {
+    let ver: u8 = h.version.load();
+    let kind: u8 = h.router_kind.load();
+    let len: u8 = h.hostname_len.load();
+    let kind = match DdmRouterKind::try_from(kind) {
+        Ok(k) => format!("{:?}", k),
+        _ => format!("{}", kind),
+    };
+
+    let mut flags = Vec::new();
+    if let Some(&true) = h.flags.get(7).as_deref() {
+        flags.push("Solicit");
+    }
+    if let Some(&true) = h.flags.get(6).as_deref() {
+        flags.push("Advertise");
+    }
+    let flags = flags.join("|");
+
+    let host = &frame[4..4 + (len as usize)];
+
+    println!(
+        "{} {} {} {} {} {}",
+        layer!("DDMd"),
+        field!("version", ver),
+        field!("flags", flags),
+        field!("kind", kind),
+        field!("len", len),
+        field!("host", String::from_utf8_lossy(host))
     );
 }
 

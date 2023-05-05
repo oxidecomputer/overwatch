@@ -8,8 +8,8 @@ use dlpi::{
 };
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
-//TODO figure out from OS
-const MTU: usize = 1500;
+//TODO figure out from OS MTU
+const MAX_FRAME: usize = 9000;
 
 pub fn run(s: &Snoop) -> Result<()> {
     let mut pipeline = init_pipeline(s);
@@ -18,7 +18,7 @@ pub fn run(s: &Snoop) -> Result<()> {
     dump::sep();
     loop {
         let mut src = [0u8; DLPI_PHYSADDR_MAX];
-        let mut msg = vec![0u8; MTU];
+        let mut msg = vec![0u8; MAX_FRAME];
         let mut recvinfo = dlpi_recvinfo_t::default();
         let n = match recv(lnk, &mut src, &mut msg, -1, Some(&mut recvinfo)) {
             Ok((_, n)) => n,

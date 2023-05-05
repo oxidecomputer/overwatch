@@ -7,13 +7,13 @@ use crate::dump;
 pub fn run(filename: &str) -> Result<()> {
     dump::sep();
     let hdrs = parse(filename)?;
-    for (h, n) in hdrs {
-        dump::headers(h, n);
+    for (h, f) in hdrs {
+        dump::headers(h, &f);
     }
     Ok(())
 }
 
-pub fn parse(filename: &str) -> Result<Vec<(crate::headers_t, usize)>> {
+pub fn parse(filename: &str) -> Result<Vec<(crate::headers_t, Vec<u8>)>> {
     let file = File::open(filename)?;
     let lines = BufReader::new(file).lines();
 
@@ -24,7 +24,7 @@ pub fn parse(filename: &str) -> Result<Vec<(crate::headers_t, usize)>> {
         line.retain(|c| !c.is_whitespace());
         if line.is_empty() {
             let hdr = parse_frame(frame.as_mut_slice());
-            result.push((hdr, frame.len()));
+            result.push((hdr, frame.clone()));
             frame = Vec::new();
         } else {
             let data = hex::decode(&line)?;
@@ -33,7 +33,7 @@ pub fn parse(filename: &str) -> Result<Vec<(crate::headers_t, usize)>> {
     }
     if !frame.is_empty() {
         let hdr = parse_frame(frame.as_mut_slice());
-        result.push((hdr, frame.len()));
+        result.push((hdr, frame.clone()));
     }
     Ok(result)
 }

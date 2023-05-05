@@ -107,6 +107,13 @@ header ddm_element_t {
     bit<24> timestamp;
 }
 
+header ddm_discovery_h {
+    bit<8> version;
+    bit<8> flags;
+    bit<8> router_kind;
+    bit<8> hostname_len;
+}
+
 struct headers_t {
     // L2
     ethernet_h ethernet;
@@ -123,6 +130,7 @@ struct headers_t {
     icmp_h icmp;
     tcp_h tcp;
     udp_h udp;
+    ddm_discovery_h ddm_discovery;
 
     // Tunnel
     geneve_h geneve;
