@@ -113,6 +113,43 @@ control ipv6(
     }
 }
 
+control ports(
+    inout bit<16> src_port,
+    inout bit<16> dst_port,
+    inout egress_metadata_t egress,
+) {
+    action keep() { egress.port = 16w1; }
+    action drop() { egress.drop = true; }
+
+    table src {
+        key = { src_port: ternary; }
+        actions = { keep; drop; }
+        default_action = NoAction;
+    }
+
+    table dst {
+        key = { dst_port: ternary; }
+        actions = { keep; drop; }
+        default_action = NoAction;
+    }
+
+    table port {
+        key = { 
+            src_port: ternary;
+            dst_port: ternary;
+        }
+        actions = { keep; drop; }
+        default_action = NoAction;
+    }
+
+    apply {
+        src.apply();
+        dst.apply();
+        port.apply();
+    }
+
+}
+
 control app(
     in bit<8> alp,
     inout egress_metadata_t egress,
@@ -141,11 +178,13 @@ control ingress(
     eth() eth;
     ipv4() ipv4;
     ipv6() ipv6;
+    ports() ports;
     app() app;
 
     eth() inner_eth;
     ipv4() inner_ipv4;
     ipv6() inner_ipv6;
+    ports() inner_ports;
     app() inner_app;
 
     apply {
@@ -161,6 +200,12 @@ control ingress(
         if (hdr.ipv6.isValid()) {
             ipv6.apply(hdr.ipv6, egress);
         }
+        if (hdr.udp.isValid()) {
+            ports.apply(ingress.src_port, ingress.dst_port, egress);
+        }
+        if (hdr.tcp.isValid()) {
+            ports.apply(ingress.src_port, ingress.dst_port, egress);
+        }
         app.apply(ingress.alp, egress);
 
         // inner
@@ -172,6 +217,12 @@ control ingress(
         }
         if(hdr.inner_ipv6.isValid()) {
             inner_ipv6.apply(hdr.inner_ipv6, egress);
+        }
+        if (hdr.inner_udp.isValid()) {
+            ports.apply(ingress.inner_src_port, ingress.inner_dst_port, egress);
+        }
+        if (hdr.inner_tcp.isValid()) {
+            ports.apply(ingress.inner_src_port, ingress.inner_dst_port, egress);
         }
         inner_app.apply(ingress.inner_alp, egress);
     }

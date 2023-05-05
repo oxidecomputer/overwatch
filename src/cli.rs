@@ -68,6 +68,18 @@ pub struct Snoop {
     #[arg(long)]
     pub ip_proto: Vec<IpProto>,
 
+    /// Filter on transport layer source port.
+    #[arg(long)]
+    pub src_port: Vec<u16>,
+
+    /// Filter on transport layer destination port.
+    #[arg(long)]
+    pub dst_port: Vec<u16>,
+
+    /// Filter on transport layer port.
+    #[arg(long)]
+    pub port: Vec<u16>,
+
     /// Filter on the provided application layer protocol types.
     #[arg(long)]
     pub alp: Vec<Alp>,
@@ -100,6 +112,18 @@ pub struct Snoop {
     /// Filter on the provided IP protocol types for encapsulated packets.
     #[arg(long)]
     pub inner_ip_proto: Vec<IpProto>,
+
+    /// Filter on transport layer source port for encapsulated packets.
+    #[arg(long)]
+    pub inner_src_port: Vec<u16>,
+
+    /// Filter on transport layer destination port for encapsulated packets.
+    #[arg(long)]
+    pub inner_dst_port: Vec<u16>,
+
+    /// Filter on transport layer port for encapsulated packets.
+    #[arg(long)]
+    pub inner_port: Vec<u16>,
 
     /// Filter on the provided application layer protocol types for encapsulated
     /// packets.

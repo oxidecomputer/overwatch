@@ -94,6 +94,8 @@ parser parse(
 
     state udp {
         pkt.extract(hdr.udp);
+        ingress.src_port = hdr.udp.src_port;
+        ingress.dst_port = hdr.udp.dst_port;
         if (hdr.udp.dst_port == GENEVE_PORT) {
             transition geneve;
         }
@@ -105,6 +107,8 @@ parser parse(
 
     state tcp {
         pkt.extract(hdr.tcp);
+        ingress.src_port = hdr.tcp.src_port;
+        ingress.dst_port = hdr.tcp.dst_port;
         transition accept;
     }
 
@@ -155,11 +159,15 @@ parser parse(
 
     state inner_udp {
         pkt.extract(hdr.inner_udp);
+        ingress.inner_src_port = hdr.udp.src_port;
+        ingress.inner_dst_port = hdr.udp.dst_port;
         transition accept;
     }
 
     state inner_tcp {
         pkt.extract(hdr.inner_tcp);
+        ingress.inner_src_port = hdr.tcp.src_port;
+        ingress.inner_dst_port = hdr.tcp.dst_port;
         transition accept;
     }
 

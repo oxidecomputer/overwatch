@@ -49,10 +49,19 @@ fn init_pipeline(cfg: &Snoop) -> main_pipeline {
         set_ip_host(&mut pipeline, *host, false);
     }
     for proto in &cfg.ip_proto {
-        ip_proto(&mut pipeline, *proto as u8, false)
+        ip_proto(&mut pipeline, *proto as u8, false);
+    }
+    for src in &cfg.src_port {
+        src_port(&mut pipeline, *src, false);
+    }
+    for dst in &cfg.dst_port {
+        dst_port(&mut pipeline, *dst, false);
+    }
+    for p in &cfg.port {
+        port(&mut pipeline, *p, false);
     }
     for alp in &cfg.alp {
-        app_proto(&mut pipeline, *alp as u8, false)
+        app_proto(&mut pipeline, *alp as u8, false);
     }
     if cfg.v4 {
         v4_only(&mut pipeline, false);
@@ -76,6 +85,15 @@ fn init_pipeline(cfg: &Snoop) -> main_pipeline {
     }
     for proto in &cfg.inner_ip_proto {
         ip_proto(&mut pipeline, *proto as u8, true)
+    }
+    for src in &cfg.src_port {
+        src_port(&mut pipeline, *src, true);
+    }
+    for dst in &cfg.dst_port {
+        dst_port(&mut pipeline, *dst, true);
+    }
+    for p in &cfg.port {
+        port(&mut pipeline, *p, true);
     }
     for alp in &cfg.inner_alp {
         app_proto(&mut pipeline, *alp as u8, true)
@@ -381,6 +399,107 @@ fn ip_proto(pipeline: &mut main_pipeline, proto: u8, encap: bool) {
     } else {
         pipeline.add_ingress_ipv4_proto_entry("drop", key.as_slice(), &[], 0);
         pipeline.add_ingress_ipv6_proto_entry("drop", key.as_slice(), &[], 0);
+    }
+}
+
+fn src_port(pipeline: &mut main_pipeline, port: u16, encap: bool) {
+    let mut key = vec![1];
+    key.extend_from_slice(&port.to_le_bytes());
+    if encap {
+        pipeline.add_ingress_inner_ports_src_entry(
+            "keep",
+            key.as_slice(),
+            &[],
+            100,
+        );
+    } else {
+        pipeline.add_ingress_ports_src_entry("keep", key.as_slice(), &[], 100);
+    }
+
+    key[0] = 0;
+    if encap {
+        pipeline.add_ingress_inner_ports_src_entry(
+            "drop",
+            key.as_slice(),
+            &[],
+            0,
+        );
+    } else {
+        pipeline.add_ingress_ports_src_entry("drop", key.as_slice(), &[], 0);
+    }
+}
+
+fn dst_port(pipeline: &mut main_pipeline, port: u16, encap: bool) {
+    let mut key = vec![1];
+    key.extend_from_slice(&port.to_le_bytes());
+    if encap {
+        pipeline.add_ingress_inner_ports_dst_entry(
+            "keep",
+            key.as_slice(),
+            &[],
+            100,
+        );
+    } else {
+        pipeline.add_ingress_ports_dst_entry("keep", key.as_slice(), &[], 100);
+    }
+
+    key[0] = 0;
+    if encap {
+        pipeline.add_ingress_inner_ports_dst_entry(
+            "drop",
+            key.as_slice(),
+            &[],
+            0,
+        );
+    } else {
+        pipeline.add_ingress_ports_dst_entry("drop", key.as_slice(), &[], 0);
+    }
+}
+
+fn port(pipeline: &mut main_pipeline, port: u16, encap: bool) {
+    // key1
+    let mut key = vec![1];
+    key.extend_from_slice(&port.to_le_bytes());
+    // key2
+    key.push(0);
+    key.extend_from_slice(&port.to_le_bytes());
+    let stride = std::mem::size_of::<u16>() + 1;
+
+    if encap {
+        pipeline.add_ingress_inner_ports_port_entry(
+            "keep",
+            key.as_slice(),
+            &[],
+            100,
+        );
+    } else {
+        pipeline.add_ingress_ports_port_entry("keep", key.as_slice(), &[], 100);
+    }
+
+    key[0] = 0;
+    key[stride] = 1;
+
+    if encap {
+        pipeline.add_ingress_inner_ports_port_entry(
+            "keep",
+            key.as_slice(),
+            &[],
+            100,
+        );
+    } else {
+        pipeline.add_ingress_ports_port_entry("keep", key.as_slice(), &[], 100);
+    }
+
+    key[stride] = 0;
+    if encap {
+        pipeline.add_ingress_inner_ports_port_entry(
+            "drop",
+            key.as_slice(),
+            &[],
+            0,
+        );
+    } else {
+        pipeline.add_ingress_ports_port_entry("drop", key.as_slice(), &[], 0);
     }
 }
 
