@@ -137,6 +137,9 @@ parser parse(
     
     state inner_ipv4 {
         pkt.extract(hdr.inner_ipv4);
+        if (hdr.inner_ipv4.protocol == ICMP_IPPROTO) {
+            transition inner_icmp;
+        }
         if (hdr.inner_ipv4.protocol == UDP_IPPROTO) {
             transition inner_udp;
         }
@@ -148,12 +151,20 @@ parser parse(
 
     state inner_ipv6 {
         pkt.extract(hdr.inner_ipv6);
+        if (hdr.inner_ipv6.next_hdr == ICMP_IPPROTO) {
+            transition inner_icmp;
+        }
         if (hdr.inner_ipv6.next_hdr == UDP_IPPROTO) {
             transition inner_udp;
         }
         if (hdr.inner_ipv6.next_hdr == TCP_IPPROTO) {
             transition inner_tcp;
         }
+        transition accept;
+    }
+
+    state inner_icmp {
+        pkt.extract(hdr.inner_icmp);
         transition accept;
     }
 
