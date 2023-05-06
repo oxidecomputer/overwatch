@@ -874,7 +874,7 @@ pub fn geneve(h: crate::geneve_h) {
         Ok(h) => format!("{:?}", h).green(),
         _ => format!("0x{:04x}", proto).green(),
     };
-    let vni: u32 = h.vni.load_be();
+    let vni: u32 = h.vni.load_le();
 
     println!(
         "{} {} {} {} {} {} {}",
