@@ -469,7 +469,7 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
         off += hlen!(ethernet_h);
     }
     if h.ipv4.isValid() {
-        let ihl: u8 = h.inner_ipv4.ihl.load();
+        let ihl: u8 = h.ipv4.ihl.load();
         ipv4(h.ipv4);
         off += (ihl << 2) as usize;
         if h.icmp.isValid() {
