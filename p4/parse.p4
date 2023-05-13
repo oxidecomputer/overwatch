@@ -3,6 +3,7 @@
 #define IPV6_ETHERTYPE      16w0x86dd
 #define ARP_ETHERTYPE       16w0x0806
 #define SIDECAR_ETHERTYPE   16w0x0901
+#define VLAN_ETHERTYPE      16w0x8100
 
 // Network layer protocol numbers.
 #define ICMP_IPPROTO    8w1
@@ -38,6 +39,26 @@ parser parse(
             transition sidecar;
         }
         if (hdr.ethernet.ether_type == ARP_ETHERTYPE) {
+            transition arp;
+        }
+        if (hdr.ethernet.ether_type == VLAN_ETHERTYPE) {
+            transition vlan;
+        }
+        transition reject;
+    }
+
+    state vlan {
+        pkt.extract(hdr.vlan);
+        if (hdr.vlan.ether_type == IPV4_ETHERTYPE) {
+            transition ipv4;
+        }
+        if (hdr.vlan.ether_type == IPV6_ETHERTYPE) {
+            transition ipv6;
+        }
+        if (hdr.vlan.ether_type == SIDECAR_ETHERTYPE) {
+            transition sidecar;
+        }
+        if (hdr.vlan.ether_type == ARP_ETHERTYPE) {
             transition arp;
         }
         transition reject;

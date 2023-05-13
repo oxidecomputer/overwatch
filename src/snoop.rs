@@ -63,6 +63,12 @@ fn init_pipeline(cfg: &Snoop) -> main_pipeline {
     for alp in &cfg.alp {
         app_proto(&mut pipeline, *alp as u8, false);
     }
+    if cfg.vlan {
+        vlan_only(&mut pipeline);
+    }
+    for vid in &cfg.vid {
+        vlan_vid(&mut pipeline, *vid);
+    }
     if cfg.v4 {
         v4_only(&mut pipeline, false);
     }
@@ -526,6 +532,22 @@ fn app_proto(pipeline: &mut main_pipeline, proto: u8, encap: bool) {
     } else {
         pipeline.add_ingress_app_proto_entry("drop", key.as_slice(), &[], 0);
     }
+}
+
+fn vlan_only(pipeline: &mut main_pipeline) {
+    let mut key = vec![1];
+    key.extend_from_slice(0x8100u16.to_le_bytes().as_slice());
+    pipeline.add_ingress_eth_ethertype_entry("keep", key.as_slice(), &[], 100);
+    key[0] = 0;
+    pipeline.add_ingress_eth_ethertype_entry("drop", key.as_slice(), &[], 0);
+}
+
+fn vlan_vid(pipeline: &mut main_pipeline, vid: u16) {
+    let mut key = vec![1];
+    key.extend_from_slice(vid.to_le_bytes().as_slice());
+    pipeline.add_ingress_vlan_vid_entry("keep", key.as_slice(), &[], 100);
+    key[0] = 0;
+    pipeline.add_ingress_vlan_vid_entry("drop", key.as_slice(), &[], 0);
 }
 
 fn v4_only(pipeline: &mut main_pipeline, encap: bool) {

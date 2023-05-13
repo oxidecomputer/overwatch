@@ -29,6 +29,24 @@ control eth(
     }
 }
 
+control vlan(
+    inout vlan_h vlan,
+    inout egress_metadata_t egress,
+) {
+    action keep() { egress.port = 16w1; }
+    action drop() { egress.drop = true; }
+
+    table vid {
+        key = { vlan.vid: ternary; }
+        actions = { keep; drop; }
+        default_action = NoAction;
+    }
+
+    apply {
+        vid.apply();
+    }
+}
+
 control ipv4(
     inout ipv4_h ipv4,
     inout egress_metadata_t egress,
@@ -176,6 +194,7 @@ control ingress(
     inout egress_metadata_t egress,
 ) {
     eth() eth;
+    vlan() vlan;
     ipv4() ipv4;
     ipv6() ipv6;
     ports() ports;
@@ -193,6 +212,9 @@ control ingress(
         // outer
         if (hdr.ethernet.isValid()) {
             eth.apply(hdr.ethernet, egress);
+        }
+        if (hdr.vlan.isValid()) {
+            vlan.apply(hdr.vlan, egress);
         }
         if (hdr.ipv4.isValid()) {
             ipv4.apply(hdr.ipv4, egress);

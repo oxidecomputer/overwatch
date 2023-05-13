@@ -468,6 +468,10 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
         ethernet(h.ethernet, Some(frame.len()));
         off += hlen!(ethernet_h);
     }
+    if h.vlan.isValid() {
+        vlan(h.vlan);
+        off += hlen!(vlan_h);
+    }
     if h.ipv4.isValid() {
         let ihl: u8 = h.ipv4.ihl.load();
         ipv4(h.ipv4);
@@ -574,6 +578,26 @@ pub fn ethernet(h: crate::ethernet_h, frame_len: Option<usize>) {
     } else {
         println!()
     }
+}
+
+pub fn vlan(h: crate::vlan_h) {
+    let pcp: u8 = h.pcp.load();
+    let dei: bool = *h.dei.get(0).unwrap();
+    let vid: u16 = h.vid.load_le();
+    let et: u16 = h.ether_type.load_le();
+    let et = match Ethertype::try_from(et) {
+        Ok(h) => format!("{:?}", h).green(),
+        _ => format!("0x{:04x}", et).green(),
+    };
+
+    println!(
+        "{} {} {} {} {}",
+        layer!("Vlan"),
+        vid.to_string().blue(),
+        field!("pcp", pcp),
+        field!("dei", dei),
+        field!("et", et),
+    );
 }
 
 pub fn ipv4(h: crate::ipv4_h) {

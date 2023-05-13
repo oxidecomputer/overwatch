@@ -15,6 +15,13 @@ header ethernet_h {
     bit<16> ether_type;
 }
 
+header vlan_h {
+    bit<3> pcp;
+    bit<1> dei;
+    bit<12> vid;
+    bit<16> ether_type;
+}
+
 header ipv6_h {
     bit<4>      version;
     bit<8>      traffic_class;
@@ -117,6 +124,7 @@ header ddm_discovery_h {
 struct headers_t {
     // L2
     ethernet_h ethernet;
+    vlan_h vlan;
 
     // L2.5
     sidecar_h sidecar;

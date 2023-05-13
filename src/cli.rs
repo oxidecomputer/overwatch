@@ -84,6 +84,14 @@ pub struct Snoop {
     #[arg(long)]
     pub alp: Vec<Alp>,
 
+    /// Filter for only VLAN traffic.
+    #[arg(long)]
+    pub vlan: bool,
+
+    /// Filter on VLAN VIDs.
+    #[arg(long)]
+    pub vid: Vec<u16>,
+
     /// Filter for only IPv4 traffic.
     #[arg(long)]
     pub v4: bool,
