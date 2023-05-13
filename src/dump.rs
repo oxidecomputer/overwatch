@@ -37,19 +37,31 @@ pub fn bv_to_ipv6(bv: BitVec<u8, Msb0>) -> Result<Ipv6Addr> {
     Ok(Ipv6Addr::from(m))
 }
 
-#[allow(clippy::upper_case_acronyms)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive)]
 #[repr(u16)]
 pub enum Ethertype {
     IPv4 = 0x0800,
     IPv6 = 0x86dd,
     Arp = 0x0806,
-    WOL = 0x0842,
+    Wol = 0x0842,
     Vlan = 0x8100,
     Pbr = 0x88A8,
     QnQ = 0x9100,
     Sidecar = 0x901,
     Ethernet = 0x6558,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive)]
+#[repr(u16)]
+pub enum ArpOpcode {
+    Request = 1,
+    Reply = 2,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive)]
+#[repr(u16)]
+pub enum ArpHwType {
+    Ethernet = 1,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive)]
@@ -472,6 +484,10 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
         vlan(h.vlan);
         off += hlen!(vlan_h);
     }
+    if h.arp.isValid() {
+        arp(h.arp);
+        off += hlen!(arp_h);
+    }
     if h.ipv4.isValid() {
         let ihl: u8 = h.ipv4.ihl.load();
         ipv4(h.ipv4);
@@ -508,6 +524,10 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
     }
     if h.inner_eth.isValid() {
         ethernet(h.inner_eth, None);
+    }
+    if h.inner_arp.isValid() {
+        arp(h.inner_arp);
+        off += hlen!(arp_h);
     }
     if h.inner_ipv4.isValid() {
         let ihl: u8 = h.inner_ipv4.ihl.load();
@@ -559,6 +579,21 @@ macro_rules! from_to {
     };
 }
 
+macro_rules! resolve {
+    ($src_ip:expr, $src_mac:expr, $dst_ip:expr, $dst_mac:expr) => {
+        format!(
+            "{}{}{} {} {}{}{}",
+            $src_ip.to_string().blue(),
+            "/".dimmed(),
+            $src_mac.to_string().blue(),
+            ">".dimmed(),
+            $dst_ip.to_string().blue(),
+            "/".dimmed(),
+            $dst_mac.to_string().blue(),
+        )
+    };
+}
+
 pub fn ethernet(h: crate::ethernet_h, frame_len: Option<usize>) {
     let Ok(dst) = bv_to_mac(h.dst) else { return };
     let Ok(src) = bv_to_mac(h.src) else { return };
@@ -597,6 +632,42 @@ pub fn vlan(h: crate::vlan_h) {
         field!("pcp", pcp),
         field!("dei", dei),
         field!("et", et),
+    );
+}
+
+pub fn arp(h: crate::arp_h) {
+    let ht: u16 = h.hw_type.load_le();
+    let ht = match ArpHwType::try_from(ht) {
+        Ok(h) => format!("{:?}", h),
+        _ => format!("0x{:04x}", ht),
+    };
+    let pt: u16 = h.proto_type.load_le();
+    let pt = match Ethertype::try_from(pt) {
+        Ok(h) => format!("{:?}", h).green(),
+        _ => format!("0x{:04x}", pt).green(),
+    };
+    let hlen: u8 = h.hw_addr_len.load();
+    let plen: u8 = h.proto_addr_len.load();
+    let opcode: u16 = h.opcode.load_le();
+    let opcode = match ArpOpcode::try_from(opcode) {
+        Ok(h) => format!("{:?}", h),
+        _ => format!("0x{:04x}", opcode),
+    };
+
+    let Ok(sender_mac) = bv_to_mac(h.sender_mac) else { return; };
+    let Ok(sender_ip) = bv_to_ipv4(h.sender_ip) else { return; };
+    let Ok(target_mac) = bv_to_mac(h.target_mac) else { return; };
+    let Ok(target_ip) = bv_to_ipv4(h.target_ip) else { return; };
+
+    println!(
+        "{} {} {} {} {} {} {}",
+        layer!("Arp"),
+        resolve!(sender_ip, sender_mac, target_ip, target_mac),
+        field!("op", opcode),
+        field!("ht", ht),
+        field!("pt", pt),
+        field!("hlen", hlen),
+        field!("plen", plen),
     );
 }
 

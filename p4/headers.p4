@@ -143,6 +143,7 @@ struct headers_t {
     // Tunnel
     geneve_h geneve;
     ethernet_h inner_eth;
+    arp_h inner_arp;
     ipv4_h inner_ipv4;
     ipv6_h inner_ipv6;
     tcp_h inner_tcp;

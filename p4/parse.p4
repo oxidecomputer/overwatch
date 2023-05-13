@@ -153,7 +153,15 @@ parser parse(
         if (hdr.inner_eth.ether_type == IPV6_ETHERTYPE) {
             transition inner_ipv6;
         }
+        if (hdr.inner_eth.ether_type == ARP_ETHERTYPE) {
+            transition inner_arp;
+        }
         transition reject;
+    }
+
+    state inner_arp {
+        pkt.extract(hdr.inner_arp);
+        transition accept;
     }
     
     state inner_ipv4 {
