@@ -3,7 +3,7 @@ use bitvec::prelude::*;
 use colored::Colorize;
 use macaddr::MacAddr6;
 use num_enum::TryFromPrimitive;
-use p4rs::Header;
+use p4rs::{checksum::udp6_checksum, Header};
 use pretty_hex::*;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
@@ -476,6 +476,7 @@ macro_rules! hlen {
 
 pub fn headers(h: crate::headers_t, frame: &[u8]) {
     let mut off = 0usize;
+    let mut v6_start = None;
     if h.ethernet.isValid() {
         ethernet(h.ethernet, Some(frame.len()));
         off += hlen!(ethernet_h);
@@ -497,6 +498,7 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
             off += hlen!(icmp_h);
         }
     } else if h.ipv6.isValid() {
+        v6_start = Some(off);
         ipv6(h.ipv6);
         if h.icmp.isValid() {
             icmp6(h.icmp);
@@ -510,7 +512,8 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
         off += (len << 2) as usize;
     }
     if h.udp.isValid() {
-        udp(h.udp);
+        let csum = v6_start.map(|off| udp6_checksum(&frame[off..]));
+        udp(h.udp, csum);
         off += hlen!(udp_h);
     }
     if h.ddm_discovery.isValid() {
@@ -551,7 +554,7 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
     }
     #[allow(unused_assignments)]
     if h.inner_udp.isValid() {
-        udp(h.inner_udp);
+        udp(h.inner_udp, None);
         off += hlen!(udp_h);
     }
 }
@@ -559,6 +562,17 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
 macro_rules! field {
     ($label:expr, $value:expr) => {
         format!("{} {}", $label.dimmed(), $value)
+    };
+}
+
+macro_rules! bad_field {
+    ($label:expr, $bad:expr, $expected:expr) => {
+        format!(
+            "{} {} != {}",
+            $label.dimmed(),
+            $bad.to_string().red(),
+            $expected.to_string(),
+        )
     };
 }
 
@@ -799,18 +813,24 @@ pub fn tcp(h: crate::tcp_h) {
     );
 }
 
-pub fn udp(h: crate::udp_h) {
+pub fn udp(h: crate::udp_h, csum: Option<u16>) {
     let src: u16 = h.src_port.load_le();
     let dst: u16 = h.dst_port.load_le();
     let len: u16 = h.len.load_le();
     let chk: u16 = h.checksum.load_le();
+
+    let chk_field = match csum {
+        Some(expected) if chk == expected => field!("chk", chk),
+        Some(expected) => bad_field!("chk", chk, expected),
+        None => field!("chk", chk),
+    };
 
     println!(
         "{} {} {} {}",
         layer!("UDP"),
         from_to!(src, dst),
         field!("len", len),
-        field!("chk", chk),
+        chk_field,
     )
 }
 
