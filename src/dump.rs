@@ -52,6 +52,17 @@ pub enum Ethertype {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive)]
+#[repr(u8)]
+pub enum SidecarCode {
+    FwdFromUserspace = 0x0,
+    FwdToUserspace = 0x1,
+    IcmpNeeded = 0x2,
+    ArpNeeded = 0x3,
+    NeighborNeeded = 0x4,
+    Invalid = 0x5,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive)]
 #[repr(u16)]
 pub enum ArpOpcode {
     Request = 1,
@@ -485,6 +496,10 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
         vlan(h.vlan);
         off += hlen!(vlan_h);
     }
+    if h.sidecar.isValid() {
+        sidecar(h.sidecar);
+        off += hlen!(sidecar_h);
+    }
     if h.arp.isValid() {
         arp(h.arp);
         off += hlen!(arp_h);
@@ -646,6 +661,32 @@ pub fn vlan(h: crate::vlan_h) {
         field!("pcp", pcp),
         field!("dei", dei),
         field!("et", et),
+    );
+}
+
+pub fn sidecar(h: crate::sidecar_h) {
+    let sc: u8 = h.sc_code.load();
+    let sc = match SidecarCode::try_from(sc) {
+        Ok(h) => format!("{:?}", h),
+        _ => format!("0x{:02x}", sc),
+    };
+
+    let sc_ingress: u16 = h.sc_ingress.load_le();
+    let sc_egress: u16 = h.sc_ingress.load_le();
+
+    let et: u16 = h.sc_ether_type.load_le();
+    let et = match Ethertype::try_from(et) {
+        Ok(h) => format!("{:?}", h).green(),
+        _ => format!("0x{:04x}", et).green(),
+    };
+
+    println!(
+        "{} {} {} {} {}",
+        layer!("Sc"),
+        sc,
+        sc_ingress,
+        sc_egress,
+        et,
     );
 }
 
