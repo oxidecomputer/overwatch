@@ -245,6 +245,7 @@ pub enum Alp {
     Http = 0x3,
     DdmDiscovery = 0x4,
     DdmExchange = 0x5,
+    Bfd = 0x6,
 }
 
 #[allow(clippy::upper_case_acronyms)]
@@ -459,6 +460,29 @@ pub enum Icmp6NodeInformationResponseCode {
     QtypeUnknown = 2,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive)]
+#[repr(u8)]
+pub enum BfdDiagnostic {
+    NoDiagnostic = 0,
+    ControlDetectionTimeExpired = 1,
+    EchoFunctionFailed = 2,
+    NeighborSignaledSessionDown = 3,
+    ForwardingPlaneReset = 4,
+    PathDown = 5,
+    ConcatenatedPathDown = 6,
+    AdministrativelyDown = 7,
+    ReverseConcatenatedPathDown = 8,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive)]
+#[repr(u8)]
+pub enum BfdStatus {
+    AdministrativelyDown = 0,
+    Down = 1,
+    Init = 2,
+    Up = 3,
+}
+
 pub fn sep() {
     println!("{}", "=====|".dimmed());
 }
@@ -534,6 +558,10 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
     if h.ddm_discovery.isValid() {
         ddm_discovery(h.ddm_discovery, &frame[off..]);
         off += hlen!(ddm_discovery_h);
+    }
+    if h.bfd.isValid() {
+        bfd(h.bfd);
+        off += hlen!(bfd_h);
     }
     if h.geneve.isValid() {
         geneve(h.geneve);
@@ -1017,6 +1045,74 @@ pub fn ddm_discovery(h: crate::ddm_discovery_h, frame: &[u8]) {
         field!("kind", kind),
         field!("len", len),
         field!("host", String::from_utf8_lossy(host))
+    );
+}
+
+pub fn bfd(h: crate::bfd_h) {
+    let ver: u8 = h.version.load();
+    let diag: u8 = h.diag.load();
+    let status: u8 = h.status.load();
+    let detect_mult: u8 = h.detect_mult.load();
+    let len: u8 = h.len.load();
+    let mine: u32 = h.my_discriminator.load_le();
+    let yours: u32 = h.your_discriminator.load_le();
+    let dtx: u32 = h.desired_min_tx_interval.load_le();
+    let rtx: u32 = h.required_min_tx_interval.load_le();
+    let recho: u32 = h.required_min_echo_rx_interval.load_le();
+
+    let diag = match BfdDiagnostic::try_from(diag) {
+        Ok(BfdDiagnostic::NoDiagnostic) => String::new(),
+        Ok(d) => format!("{:?}", d),
+        _ => format!("{:?}", diag).red().to_string(),
+    };
+
+    let status = match BfdStatus::try_from(status) {
+        Ok(s) => format!("{:?}", s),
+        _ => format!("{:?}", status).red().to_string(),
+    };
+
+    let mut flags = Vec::new();
+    if let Some(&true) = h.poll.get(0).as_deref() {
+        flags.push("poll");
+    }
+    if let Some(&true) = h.fin.get(0).as_deref() {
+        flags.push("final");
+    }
+    if let Some(&true) = h.control_plane_independent.get(0).as_deref() {
+        flags.push("cpi");
+    }
+    if let Some(&true) = h.authentication_present.get(0).as_deref() {
+        flags.push("auth");
+    }
+    if let Some(&true) = h.demand.get(0).as_deref() {
+        flags.push("demand");
+    }
+    if let Some(&true) = h.multipoint.get(0).as_deref() {
+        flags.push("mp");
+    }
+    let flags = flags.join("|");
+
+    print!(
+        "{} {} {}",
+        layer!("Bfd"),
+        field!("ver", ver),
+        field!("status", status),
+    );
+    if !diag.is_empty() {
+        print!(" {}", field!("diag", diag));
+    }
+    if !flags.is_empty() {
+        print!(" {}", field!("flags", flags));
+    }
+    println!(
+        " {} {} {} {} {} {} {}",
+        field!("dm", detect_mult),
+        field!("len", len),
+        field!("m", mine),
+        field!("y", yours),
+        field!("dtx", dtx),
+        field!("rtx", rtx),
+        field!("rex", recho),
     );
 }
 

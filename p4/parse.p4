@@ -14,6 +14,7 @@
 // Transport layer port numbers.
 #define GENEVE_PORT         16w6081
 #define DDM_DISCOVERY_PORT  16w0xddd
+#define BFD_MULTIHOP_PORT   16w4784
 
 // Application layer protocol identifirs.
 #define ALP_GENEVE          8w0x1
@@ -21,6 +22,7 @@
 #define ALP_HTTP            8w0x3
 #define ALP_DDM_DISCOVERY   8w0x4
 #define ALP_DDM_EXCHANGE    8w0x5
+#define ALP_BFD             8w0x6
 
 parser parse(
     packet_in pkt,
@@ -123,6 +125,9 @@ parser parse(
         if (hdr.udp.dst_port == DDM_DISCOVERY_PORT) {
             transition ddm_discovery;
         }
+        if (hdr.udp.dst_port == BFD_MULTIHOP_PORT) {
+            transition bfd;
+        }
         transition accept;
     }
 
@@ -142,6 +147,12 @@ parser parse(
     state ddm_discovery {
         pkt.extract(hdr.ddm_discovery);
         ingress.alp = ALP_DDM_DISCOVERY;
+        transition accept;
+    }
+
+    state bfd {
+        pkt.extract(hdr.bfd);
+        ingress.alp = ALP_BFD;
         transition accept;
     }
 

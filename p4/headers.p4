@@ -121,6 +121,25 @@ header ddm_discovery_h {
     bit<8> hostname_len;
 }
 
+header bfd_h {
+    bit<3> version;
+    bit<5> diag;
+    bit<2> status;
+    bit<1> poll;
+    bit<1> fin;
+    bit<1> control_plane_independent;
+    bit<1> authentication_present;
+    bit<1> demand;
+    bit<1> multipoint;
+    bit<8> detect_mult;
+    bit<8> len;
+    bit<32> my_discriminator;
+    bit<32> your_discriminator;
+    bit<32> desired_min_tx_interval;
+    bit<32> required_min_tx_interval;
+    bit<32> required_min_echo_rx_interval;
+}
+
 struct headers_t {
     // L2
     ethernet_h ethernet;
@@ -138,7 +157,10 @@ struct headers_t {
     icmp_h icmp;
     tcp_h tcp;
     udp_h udp;
+
+    // App
     ddm_discovery_h ddm_discovery;
+    bfd_h bfd;
 
     // Tunnel
     geneve_h geneve;
