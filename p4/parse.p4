@@ -84,7 +84,7 @@ parser parse(
 
     state ipv6 {
         pkt.extract(hdr.ipv6);
-        if (hdr.ipv6.next_hdr == ICMP_IPPROTO) {
+        if (hdr.ipv6.next_hdr == ICMP6_IPPROTO) {
             transition icmp;
         }
         if (hdr.ipv6.next_hdr == UDP_IPPROTO) {
