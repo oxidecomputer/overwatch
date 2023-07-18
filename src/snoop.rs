@@ -1,3 +1,5 @@
+// Copyright 2023 Oxide Computer Company
+
 use crate::cli::Snoop;
 use crate::{dump, link};
 use crate::{main_pipeline, packet_in};

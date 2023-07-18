@@ -1,4 +1,5 @@
 // Copyright 2023 Oxide Computer Company
+
 #![allow(clippy::too_many_arguments)]
 
 use anyhow::Result;

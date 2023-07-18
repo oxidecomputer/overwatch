@@ -1,3 +1,5 @@
+// Copyright 2023 Oxide Computer Company
+
 use anyhow::Result;
 use std::fs::File;
 use std::io::{BufRead, BufReader};

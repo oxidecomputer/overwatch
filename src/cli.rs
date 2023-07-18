@@ -1,3 +1,5 @@
+// Copyright 2023 Oxide Computer Company
+
 use crate::dump::{Alp, IpProto};
 use clap::{Parser, Subcommand};
 use std::net::IpAddr;

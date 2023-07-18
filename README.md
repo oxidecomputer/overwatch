@@ -1,13 +1,26 @@
 # Overwatch
 
-Connecting high-level networking requirements to low-level system configuration
-and behaviors.
+This is a packet tracing tool much like snoop or tcpdump. Its superpower is
+that it's P4 programmable.
 
-See [RFD 389](https://rfd.shared.oxide.computer/rfd/0389) for motivations. This
-is an early work-in-progress prototype.
+## OS Support
+- Illumos
 
-## Current Capabilities
-- P4 programmable snoop with support for all packet types the Oxide platform
-  switches support.
-- Interpret hex-encoded packet dumps from other tools such as `snoop`, `dtrace` and
-  `mdb`.
+## Core Capabilities
+- Snoop raw packets
+- Filter packets based on
+    - IP addresses
+    - IP protocol
+    - L4 ports
+    - Application layer protocol
+    - VLAN VID
+    - IP version
+    - ARP
+    - All the above for Geneve encapsulated packets.
+- Show packet contents in nicely formatted hex.
+- Render packet traces from raw data files in hex format.
+
+## Contributing
+
+Pull requests welcome. Please make sure CI scripts in the `.github` run OK
+before requesting review.

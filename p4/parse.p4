@@ -1,3 +1,5 @@
+// Copyright 2023 Oxide Computer Company
+
 // Link layer ethertypes.
 #define IPV4_ETHERTYPE      16w0x0800
 #define IPV6_ETHERTYPE      16w0x86dd

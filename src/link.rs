@@ -1,3 +1,5 @@
+// Copyright 2023 Oxide Computer Company
+
 use anyhow::Result;
 use dlpi::DlpiHandle;
 

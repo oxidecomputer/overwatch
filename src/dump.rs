@@ -1,3 +1,5 @@
+// Copyright 2023 Oxide Computer Company
+
 use anyhow::{anyhow, Result};
 use bitvec::prelude::*;
 use colored::Colorize;
