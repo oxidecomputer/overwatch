@@ -76,6 +76,9 @@ parser parse(
         if (hdr.sidecar.sc_ether_type == IPV6_ETHERTYPE) {
             transition ipv6;
         }
+        if (hdr.sidecar.sc_ether_type == ARP_ETHERTYPE) {
+            transition arp;
+        }
         transition reject;
     }
 
