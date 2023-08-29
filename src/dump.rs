@@ -702,7 +702,7 @@ pub fn sidecar(h: crate::sidecar_h) {
     };
 
     let sc_ingress: u16 = h.sc_ingress.load_le();
-    let sc_egress: u16 = h.sc_ingress.load_le();
+    let sc_egress: u16 = h.sc_egress.load_le();
 
     let et: u16 = h.sc_ether_type.load_le();
     let et = match Ethertype::try_from(et) {
@@ -714,9 +714,9 @@ pub fn sidecar(h: crate::sidecar_h) {
         "{} {} {} {} {}",
         layer!("Sc"),
         sc,
-        sc_ingress,
-        sc_egress,
-        et,
+        field!("ingress", sc_ingress),
+        field!("egress", sc_egress),
+        field!("et", et),
     );
 }
 
@@ -739,10 +739,18 @@ pub fn arp(h: crate::arp_h) {
         _ => format!("0x{:04x}", opcode),
     };
 
-    let Ok(sender_mac) = bv_to_mac(h.sender_mac) else { return; };
-    let Ok(sender_ip) = bv_to_ipv4(h.sender_ip) else { return; };
-    let Ok(target_mac) = bv_to_mac(h.target_mac) else { return; };
-    let Ok(target_ip) = bv_to_ipv4(h.target_ip) else { return; };
+    let Ok(sender_mac) = bv_to_mac(h.sender_mac) else {
+        return;
+    };
+    let Ok(sender_ip) = bv_to_ipv4(h.sender_ip) else {
+        return;
+    };
+    let Ok(target_mac) = bv_to_mac(h.target_mac) else {
+        return;
+    };
+    let Ok(target_ip) = bv_to_ipv4(h.target_ip) else {
+        return;
+    };
 
     println!(
         "{} {} {} {} {} {} {}",
