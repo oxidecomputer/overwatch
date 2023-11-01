@@ -571,7 +571,21 @@ fn v4_only(pipeline: &mut main_pipeline, encap: bool) {
         );
     }
     key[0] = 0;
-    pipeline.add_ingress_eth_ethertype_entry("drop", key.as_slice(), &[], 0);
+    if encap {
+        pipeline.add_ingress_inner_eth_ethertype_entry(
+            "drop",
+            key.as_slice(),
+            &[],
+            0,
+        );
+    } else {
+        pipeline.add_ingress_eth_ethertype_entry(
+            "drop",
+            key.as_slice(),
+            &[],
+            0,
+        );
+    }
 }
 
 fn v6_only(pipeline: &mut main_pipeline, encap: bool) {
