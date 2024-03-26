@@ -26,6 +26,9 @@
 #define ALP_DDM_EXCHANGE    8w0x5
 #define ALP_BFD             8w0x6
 
+#define ICMP_ECHO 8w8
+#define ICMP_REPLY 8w0
+
 parser parse(
     packet_in pkt,
     out headers_t hdr,
@@ -103,6 +106,12 @@ parser parse(
 
     state icmp {
         pkt.extract(hdr.icmp);
+        if (hdr.icmp.typ == ICMP_ECHO) {
+            pkt.extract(hdr.echo);
+        }
+        if (hdr.icmp.typ == ICMP_REPLY) {
+            pkt.extract(hdr.echo);
+        }
         transition accept;
     }
 
@@ -210,6 +219,12 @@ parser parse(
 
     state inner_icmp {
         pkt.extract(hdr.inner_icmp);
+        if (hdr.inner_icmp.typ == ICMP_ECHO) {
+            pkt.extract(hdr.inner_echo);
+        }
+        if (hdr.inner_icmp.typ == ICMP_REPLY) {
+            pkt.extract(hdr.inner_echo);
+        }
         transition accept;
     }
 

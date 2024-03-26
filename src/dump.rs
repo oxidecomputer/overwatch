@@ -537,6 +537,10 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
         if h.icmp.isValid() {
             icmp(h.icmp);
             off += hlen!(icmp_h);
+            if h.echo.isValid() {
+                echo(h.echo);
+                off += hlen!(echo_h);
+            }
         }
     } else if h.ipv6.isValid() {
         v6_start = Some(off);
@@ -544,6 +548,10 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
         if h.icmp.isValid() {
             icmp6(h.icmp);
             off += hlen!(icmp_h);
+            if h.echo.isValid() {
+                echo(h.echo);
+                off += hlen!(echo_h);
+            }
         }
         off += hlen!(ipv6_h);
     }
@@ -584,12 +592,20 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
         if h.inner_icmp.isValid() {
             icmp(h.inner_icmp);
             off += hlen!(icmp_h);
+            if h.inner_echo.isValid() {
+                echo(h.inner_echo);
+                off += hlen!(echo_h);
+            }
         }
     } else if h.inner_ipv6.isValid() {
         ipv6(h.inner_ipv6);
         if h.inner_icmp.isValid() {
             icmp6(h.inner_icmp);
             off += hlen!(icmp_h);
+            if h.inner_echo.isValid() {
+                echo(h.inner_echo);
+                off += hlen!(echo_h);
+            }
         }
     }
     if h.inner_tcp.isValid() {
@@ -910,6 +926,17 @@ pub fn udp(h: crate::udp_h, csum: Option<u16>) {
         from_to!(src, dst),
         field!("len", len),
         chk_field,
+    )
+}
+
+pub fn echo(h: crate::echo_h) {
+    let id: u16 = h.id.load_le();
+    let seq: u16 = h.seq.load_le();
+    println!(
+        "{} {} {}",
+        layer!("Echo"),
+        field!("id", id),
+        field!("seq", seq),
     )
 }
 
