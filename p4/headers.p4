@@ -69,10 +69,14 @@ header tcp_h {
 }
 
 header icmp_h {
-    bit<8> type;
+    bit<8> typ;
     bit<8> code;
     bit<16> hdr_checksum;
-    bit<32> data;
+}
+
+header echo_h {
+    bit<16> id;
+    bit<16> seq;
 }
 
 header geneve_h {
@@ -155,6 +159,7 @@ struct headers_t {
 
     // L4
     icmp_h icmp;
+    echo_h echo;
     tcp_h tcp;
     udp_h udp;
 
@@ -171,4 +176,5 @@ struct headers_t {
     tcp_h inner_tcp;
     udp_h inner_udp;
     icmp_h inner_icmp;
+    echo_h inner_echo;
 }
