@@ -51,7 +51,7 @@ banner package
 pfexec mkdir -p /out
 pfexec chown "$UID" /out
 cd target/release
-tar cvf /out/overwatch.tar /overwatch
+tar cvf /out/overwatch.tar overwatch
 
 banner checksum
 cd /out
