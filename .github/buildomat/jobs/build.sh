@@ -17,7 +17,7 @@
 #:
 #: [[publish]]
 #: series = "image"
-#: name = "overwatch.tar"
+#: name = "overwatch.tar.gz"
 #: from_output = "/out/overwatch.tar.gz"
 #:
 #: [[publish]]
