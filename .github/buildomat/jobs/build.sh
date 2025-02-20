@@ -17,8 +17,8 @@
 #:
 #: [[publish]]
 #: series = "image"
-#: name = "overwatch.tar.gz"
-#: from_output = "/out/overwatch.tar.gz"
+#: name = "overwatch.tar"
+#: from_output = "/out/overwatch.tar"
 #:
 #: [[publish]]
 #: series = "image"
@@ -51,8 +51,8 @@ banner package
 pfexec mkdir -p /out
 pfexec chown "$UID" /out
 cd target/release
-tar czf /out/overwatch.tar.gz overwatch
+tar cf /out/overwatch.tar overwatch
 
 banner checksum
 cd /out
-digest -a sha256 overwatch.tar.gz > overwatch.sha256.txt
+digest -a sha256 overwatch.tar > overwatch.sha256.txt
