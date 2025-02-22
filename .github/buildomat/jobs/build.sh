@@ -14,16 +14,6 @@
 #: series = "build"
 #: name = "overwatch"
 #: from_output = "/work/release/overwatch"
-#:
-#: [[publish]]
-#: series = "image"
-#: name = "overwatch.tar"
-#: from_output = "/out/overwatch.tar"
-#:
-#: [[publish]]
-#: series = "image"
-#: name = "overwatch.sha256.txt"
-#: from_output = "/out/overwatch.sha256.txt"
 
 set -o errexit
 set -o pipefail
@@ -46,13 +36,3 @@ do
     mkdir -p /work/$x
     cp target/$x/overwatch /work/$x/
 done
-
-banner package
-pfexec mkdir -p /out
-pfexec chown "$UID" /out
-cd target/release
-tar cf /out/overwatch.tar overwatch
-
-banner checksum
-cd /out
-digest -a sha256 overwatch.tar > overwatch.sha256.txt
