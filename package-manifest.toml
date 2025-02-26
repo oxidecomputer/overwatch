@@ -1,0 +1,6 @@
+[package.omicron-zone-overwatch]
+service_name = "overwatch"
+source.type = "local"
+source.rust.binary_names = ["overwatch"]
+source.rust.release = true
+output.type = "zone"

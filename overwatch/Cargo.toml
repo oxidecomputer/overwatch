@@ -1,0 +1,21 @@
+[package]
+name = "overwatch"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anstyle.workspace = true
+anyhow.workspace = true
+bitvec.workspace = true
+clap.workspace = true
+colored.workspace = true
+dlpi.workspace = true
+hex.workspace = true
+macaddr.workspace = true
+num_enum.workspace = true
+p4-macro.workspace = true
+p4rs.workspace = true
+pretty-hex.workspace = true
+usdt.workspace = true

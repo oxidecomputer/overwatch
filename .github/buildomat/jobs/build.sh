@@ -5,6 +5,7 @@
 #: target = "helios-latest"
 #: rust_toolchain = "stable"
 #: output_rules = [
+#:   "/out/*",
 #:   "/work/debug/*",
 #:   "/work/release/*",
 #: ]
@@ -13,7 +14,6 @@
 #: series = "build"
 #: name = "overwatch"
 #: from_output = "/work/release/overwatch"
-#:
 
 set -o errexit
 set -o pipefail
