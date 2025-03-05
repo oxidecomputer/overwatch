@@ -72,37 +72,29 @@ fn remove_if_exists<P: AsRef<Path>>(path: P) -> Result<()> {
 fn cmd_package() -> Result<()> {
     let meta = cargo_meta();
 
+    println!("Remove and make new directories for packaging");
     // This is the directory where the packages are made
+    // Start by clearing out any temporary directories and ensuring
+    // that files we use are created fresh
     let pkg_dir = meta.workspace_root.join("pkg");
     remove_if_exists(&pkg_dir)?;
 
-    // Start by clearing out any temporary directories and ensuring
-    // that files we use are created fresh
     let proto_dir = pkg_dir.join("proto");
-    //remove_if_exists(&proto_dir)?;
-
     let package_dir = pkg_dir.join("packages");
-    //remove_if_exists(&package_dir)?;
     fs::create_dir_all(&package_dir)?;
 
     let base_p5m = pkg_dir.join("overwatch.base.p5m");
-    // remove_if_exists(&base_p5m)?;
-    println!("Create {:?}", &base_p5m);
     let mut file = fs::File::create(&base_p5m).unwrap();
 
     let generate_p5m = pkg_dir.join("overwatch.generate.p5m");
-    // remove_if_exists(&generate_p5m)?;
-    println!("Create {:?}", &generate_p5m);
     let generate_file = fs::File::create(&generate_p5m).unwrap();
 
     // Create the final file.
     let final_p5m = pkg_dir.join("overwatch.final.p5m");
-    // remove_if_exists(&final_p5m)?;
-    println!("Create {:?}", &final_p5m);
     let mut output_file = fs::File::create(&final_p5m)?;
 
     // Begin the process of creating our package.
-    println!("Get git rev count");
+    println!("Get git rev-list count");
     let output = Command::new("git")
         .args(["rev-list", "--count", "HEAD"])
         .output()
@@ -117,14 +109,12 @@ fn cmd_package() -> Result<()> {
         .parse()
         .expect("Failed to parse git output as a number");
 
-    println!("Git commit count: {}", commit_count);
-
-    println!("Make directories for packaging");
+    println!("Git rev-list count: {}", commit_count);
 
     let proto_bin_dir = proto_dir.join("usr").join("bin");
     fs::create_dir_all(&proto_bin_dir)?;
 
-    // cp ../target/release/overwatch proto/usr/bin/
+    // cp target/release/overwatch proto/usr/bin/
     let source = meta
         .workspace_root
         .join("target")
@@ -133,7 +123,7 @@ fn cmd_package() -> Result<()> {
 
     let destination = proto_bin_dir.join("overwatch");
 
-    println!("Now copy {:?} to {:?}", source, destination);
+    println!("Copy {:?} to {:?}", source, destination);
     fs::copy(&source, &destination)?;
 
     // Define the file content as a multi-line string
@@ -148,10 +138,9 @@ file NOHASH group=bin mode=0755 owner=root path=usr/bin/overwatch
 
     file.write_all(content.as_bytes()).unwrap();
 
-    println!("File created successfully at {}", base_p5m);
+    println!("Created {}", base_p5m);
 
     // pkgdepend generate -d proto overwatch.base.p5m > overwatch.generate.p5m
-
     let mut cmd = Command::new("pkgdepend");
     let status = cmd
         .arg("generate")
@@ -201,6 +190,7 @@ file NOHASH group=bin mode=0755 owner=root path=usr/bin/overwatch
         .current_dir(meta.workspace_root.join(&pkg_dir))
         .output_nocapture()?;
 
+    // pkgrepo add-publisher -s $REPO PUBLISHER
     let mut cmd = Command::new("pkgrepo");
     cmd.arg("add-publisher")
         .arg("-s")
@@ -209,6 +199,7 @@ file NOHASH group=bin mode=0755 owner=root path=usr/bin/overwatch
         .current_dir(meta.workspace_root.join(&pkg_dir))
         .output_nocapture()?;
 
+    // pkgsend publish -d proto -s repo overwatch_final_p5m
     let mut cmd = Command::new("pkgsend");
     cmd.arg("publish")
         .arg("-d")
@@ -219,6 +210,8 @@ file NOHASH group=bin mode=0755 owner=root path=usr/bin/overwatch
         .current_dir(meta.workspace_root.join(&pkg_dir))
         .output_nocapture()?;
 
+    // pkgrecv -a -d overwatch-0.$API_VSN.$COMMIT_COUNT.p5p -s $REPO
+    //    -v -m latest '*'
     let final_p5p =
         repo_dir.join(format!("overwatch-0.{}.{}.p5p", API_VSN, commit_count));
     let mut cmd = Command::new("pkgrecv");
