@@ -16,7 +16,6 @@ use std::process::Stdio;
 use std::sync::OnceLock;
 
 static PUBLISHER: &str = "helios-dev";
-static API_VSN: u32 = 1;
 
 static METADATA: OnceLock<Metadata> = OnceLock::new();
 fn cargo_meta() -> &'static Metadata {
@@ -72,6 +71,15 @@ fn remove_if_exists<P: AsRef<Path>>(path: P) -> Result<()> {
 fn cmd_package() -> Result<()> {
     let meta = cargo_meta();
 
+    let prog = meta
+        .workspace_root
+        .join("target")
+        .join("release")
+        .join("overwatch");
+    if !prog.is_file() {
+        anyhow::bail!("{prog:?} does not exist; did you build it?");
+    }
+
     println!("Remove and make new directories for packaging");
     // This is the directory where the packages are made
     // Start by clearing out any temporary directories and ensuring
@@ -115,32 +123,43 @@ fn cmd_package() -> Result<()> {
     fs::create_dir_all(&proto_bin_dir)?;
 
     // cp target/release/overwatch proto/usr/bin/
-    let source = meta
-        .workspace_root
-        .join("target")
-        .join("release")
-        .join("overwatch");
-
     let destination = proto_bin_dir.join("overwatch");
 
-    println!("Copy {:?} to {:?}", source, destination);
-    fs::copy(&source, &destination)?;
+    println!("Copy {:?} to {:?}", prog, destination);
+    fs::copy(&prog, &destination)?;
+
+    // Use the version number of the package that produces the "overwatch"
+    // binary, and then append another component with the commit count:
+    let cver = meta
+        .packages
+        .iter()
+        .find(|p| p.name == "overwatch")
+        .ok_or_else(|| anyhow::anyhow!("could not find overwatch in cargo"))?
+        .version
+        .to_string();
+    let ver = format!("{cver}.{commit_count}");
+    println!("creating package version: {ver:?}");
 
     // Define the file content as a multi-line string
-    let content = format!("\
-set name=pkg.fmri value=pkg://{}/overwatch@0.{}.{}
-set name=pkg.summary value=\"Overwatch packet inspection tool\"
-set name=info.classification value=org.opensolaris.category.2008:Network/Application
-set name=variant.opensolaris.zone value=global value=nonglobal
-set name=variant.arch value=i386
-file NOHASH group=bin mode=0755 owner=root path=usr/bin/overwatch
-", PUBLISHER, API_VSN, commit_count);
+    let content = indoc::formatdoc!(
+        r#"
+        set name=pkg.fmri \
+            value=pkg://{PUBLISHER}/network/overwatch@{ver}
+        set name=pkg.summary value="Overwatch: a P4-powered packet tracer"
+        set name=info.classification \
+            value=org.opensolaris.category.2008:Network/Application
+        set name=variant.opensolaris.zone value=global value=nonglobal
+        set name=variant.arch value=i386
+        file NOHASH group=bin mode=0755 owner=root path=usr/bin/overwatch
+        "#
+    );
 
     file.write_all(content.as_bytes()).unwrap();
 
     println!("Created {}", base_p5m);
 
     // pkgdepend generate -d proto overwatch.base.p5m > overwatch.generate.p5m
+    println!("generating dependency list...");
     let mut cmd = Command::new("pkgdepend");
     let status = cmd
         .arg("generate")
@@ -159,6 +178,7 @@ file NOHASH group=bin mode=0755 owner=root path=usr/bin/overwatch
     }
 
     // pkgdepend resolve -d packages -s resolve.p5m overwatch.generate.p5m
+    println!("resolving dependencies against system packages...");
     let mut cmd = Command::new("pkgdepend");
     cmd.arg("resolve")
         .arg("-d")
@@ -181,6 +201,21 @@ file NOHASH group=bin mode=0755 owner=root path=usr/bin/overwatch
     output_file.write_all(&resolve_data)?;
 
     println!("Successfully created {:?}", final_p5m);
+
+    println!("----- manifest: ---------------------------");
+    let mfst = std::fs::read_to_string(&final_p5m)?;
+    let mut p = Command::new("pkgfmt")
+        .env_clear()
+        .arg("-f")
+        .arg("v2")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .spawn()?;
+    p.stdin.as_mut().unwrap().write_all(mfst.as_bytes())?;
+    p.stdin.take().unwrap();
+    p.wait()?;
+    println!("-------------------------------------------");
 
     // pkgrepo create $REPO
     let repo_dir = package_dir.join("repo");
@@ -212,8 +247,7 @@ file NOHASH group=bin mode=0755 owner=root path=usr/bin/overwatch
 
     // pkgrecv -a -d overwatch-0.$API_VSN.$COMMIT_COUNT.p5p -s $REPO
     //    -v -m latest '*'
-    let final_p5p =
-        repo_dir.join(format!("overwatch-0.{}.{}.p5p", API_VSN, commit_count));
+    let final_p5p = repo_dir.join(format!("overwatch-{ver}.p5p"));
     let mut cmd = Command::new("pkgrecv");
     cmd.arg("-a")
         .arg("-d")

@@ -8,4 +8,5 @@ repository.workspace = true
 anyhow.workspace = true
 cargo_metadata.workspace = true
 clap.workspace = true
+indoc.workspace = true
 toml.workspace = true
