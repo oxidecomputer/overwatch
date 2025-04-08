@@ -6,6 +6,7 @@
 #define ARP_ETHERTYPE       16w0x0806
 #define SIDECAR_ETHERTYPE   16w0x0901
 #define VLAN_ETHERTYPE      16w0x8100
+#define LLDP_ETHERTYPE      16w0x88cc
 
 // Network layer protocol numbers.
 #define ICMP_IPPROTO    8w1
@@ -51,6 +52,9 @@ parser parse(
         if (hdr.ethernet.ether_type == VLAN_ETHERTYPE) {
             transition vlan;
         }
+        if (hdr.ethernet.ether_type == LLDP_ETHERTYPE) {
+	    transition accept;
+        }
         transition reject;
     }
 
@@ -81,6 +85,9 @@ parser parse(
         }
         if (hdr.sidecar.sc_ether_type == ARP_ETHERTYPE) {
             transition arp;
+        }
+        if (hdr.ethernet.ether_type == LLDP_ETHERTYPE) {
+	    transition accept;
         }
         transition reject;
     }
