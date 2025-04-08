@@ -53,7 +53,7 @@ parser parse(
             transition vlan;
         }
         if (hdr.ethernet.ether_type == LLDP_ETHERTYPE) {
-	    transition accept;
+	    transition lldp;
         }
         transition reject;
     }
@@ -72,6 +72,9 @@ parser parse(
         if (hdr.vlan.ether_type == ARP_ETHERTYPE) {
             transition arp;
         }
+        if (hdr.ethernet.ether_type == LLDP_ETHERTYPE) {
+	    transition lldp;
+        }
         transition reject;
     }
 
@@ -87,9 +90,14 @@ parser parse(
             transition arp;
         }
         if (hdr.ethernet.ether_type == LLDP_ETHERTYPE) {
-	    transition accept;
+	    transition lldp;
         }
         transition reject;
+    }
+
+    state lldp {
+        pkt.extract(hdr.lldp);
+        transition accept;
     }
 
     state arp {

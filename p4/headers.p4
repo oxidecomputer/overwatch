@@ -22,6 +22,9 @@ header vlan_h {
     bit<16> ether_type;
 }
 
+header lldp_h {
+}
+
 header ipv6_h {
     bit<4>      version;
     bit<8>      traffic_class;
@@ -148,6 +151,7 @@ struct headers_t {
     // L2
     ethernet_h ethernet;
     vlan_h vlan;
+    lldp_h lldp;
 
     // L2.5
     sidecar_h sidecar;
