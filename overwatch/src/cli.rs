@@ -1,6 +1,6 @@
 // Copyright 2023 Oxide Computer Company
 
-use crate::dump::{Alp, IpProto};
+use crate::dump::{Alp, Ethertype, IpProto};
 use clap::{Parser, Subcommand};
 use std::net::IpAddr;
 
@@ -54,6 +54,10 @@ pub struct Snoop {
     #[arg(long)]
     pub hex: bool,
 
+    /// Filter on the provided ethernet packet type.
+    #[arg(long)]
+    pub eth_type: Option<Ethertype>,
+
     /// Filter on the provided source IPs.
     #[arg(long)]
     pub ip_src: Vec<IpAddr>,
@@ -86,7 +90,7 @@ pub struct Snoop {
     #[arg(long)]
     pub alp: Vec<Alp>,
 
-    /// Filter for only VLAN traffic.
+    /// Shorthand for --eth-type vlan
     #[arg(long)]
     pub vlan: bool,
 
@@ -94,17 +98,21 @@ pub struct Snoop {
     #[arg(long)]
     pub vid: Vec<u16>,
 
-    /// Filter for only IPv4 traffic.
+    /// Shorthand for --eth-type ipv4
     #[arg(long)]
     pub v4: bool,
 
-    /// Filter for only IPv6 traffic.
+    /// Shorthand for --eth-type ipv6
     #[arg(long)]
     pub v6: bool,
 
-    /// Filter for only ARP traffic.
+    /// Shorthand for --eth-type arp
     #[arg(long)]
     pub arp: bool,
+
+    /// Filter on the provided ethernet packet types for encapsulated packets.
+    #[arg(long)]
+    pub inner_eth_type: Vec<Ethertype>,
 
     /// Filter on the provided source IPs for encapsulated packets.
     #[arg(long)]
@@ -140,15 +148,15 @@ pub struct Snoop {
     #[arg(long)]
     pub inner_alp: Vec<Alp>,
 
-    /// Filter for only IPv4 traffic for encapsulated packets.
+    /// Shorthand for --inner-eth-type ipv4
     #[arg(long)]
     pub inner_v4: bool,
 
-    /// Filter for only IPv6 traffic for encapsulated packets.
+    /// Shorthand for --inner-eth-type ipv6
     #[arg(long)]
     pub inner_v6: bool,
 
-    /// Filter for only ARP traffic for encapsulated packets.
+    /// Shorthand for --inner-eth-type arp
     #[arg(long)]
     pub inner_arp: bool,
 }

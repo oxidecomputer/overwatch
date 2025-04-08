@@ -41,6 +41,9 @@ fn init_pipeline(cfg: &Snoop) -> main_pipeline {
     let mut pipeline = main_pipeline::new(2);
 
     // outer
+    if let Some(eth_type) = cfg.eth_type {
+        ethtype_only(&mut pipeline, eth_type as u16, false);
+    }
     for src in &cfg.ip_src {
         set_ip_src(&mut pipeline, *src, false);
     }
@@ -82,6 +85,9 @@ fn init_pipeline(cfg: &Snoop) -> main_pipeline {
     }
 
     // inner
+    if let Some(eth_type) = cfg.eth_type {
+        ethtype_only(&mut pipeline, eth_type as u16, true);
+    }
     for src in &cfg.inner_ip_src {
         set_ip_src(&mut pipeline, *src, true);
     }
@@ -536,14 +542,6 @@ fn app_proto(pipeline: &mut main_pipeline, proto: u8, encap: bool) {
     }
 }
 
-fn vlan_only(pipeline: &mut main_pipeline) {
-    let mut key = vec![1];
-    key.extend_from_slice(0x8100u16.to_le_bytes().as_slice());
-    pipeline.add_ingress_eth_ethertype_entry("keep", key.as_slice(), &[], 100);
-    key[0] = 0;
-    pipeline.add_ingress_eth_ethertype_entry("drop", key.as_slice(), &[], 0);
-}
-
 fn vlan_vid(pipeline: &mut main_pipeline, vid: u16) {
     let mut key = vec![1];
     key.extend_from_slice(vid.to_le_bytes().as_slice());
@@ -552,9 +550,9 @@ fn vlan_vid(pipeline: &mut main_pipeline, vid: u16) {
     pipeline.add_ingress_vlan_vid_entry("drop", key.as_slice(), &[], 0);
 }
 
-fn v4_only(pipeline: &mut main_pipeline, encap: bool) {
+fn ethtype_only(pipeline: &mut main_pipeline, ethtype: u16, encap: bool) {
     let mut key = vec![1];
-    key.extend_from_slice(0x800u16.to_le_bytes().as_slice());
+    key.extend_from_slice(ethtype.to_le_bytes().as_slice());
     if encap {
         pipeline.add_ingress_inner_eth_ethertype_entry(
             "keep",
@@ -586,78 +584,20 @@ fn v4_only(pipeline: &mut main_pipeline, encap: bool) {
             0,
         );
     }
+}
+
+fn vlan_only(pipeline: &mut main_pipeline) {
+    ethtype_only(pipeline, 0x8100, false)
+}
+
+fn v4_only(pipeline: &mut main_pipeline, encap: bool) {
+    ethtype_only(pipeline, 0x0800, encap)
 }
 
 fn v6_only(pipeline: &mut main_pipeline, encap: bool) {
-    let mut key = vec![1];
-    key.extend_from_slice(0x86ddu16.to_le_bytes().as_slice());
-    if encap {
-        pipeline.add_ingress_inner_eth_ethertype_entry(
-            "keep",
-            key.as_slice(),
-            &[],
-            100,
-        );
-    } else {
-        pipeline.add_ingress_eth_ethertype_entry(
-            "keep",
-            key.as_slice(),
-            &[],
-            100,
-        );
-    }
-
-    key[0] = 0;
-    if encap {
-        pipeline.add_ingress_inner_eth_ethertype_entry(
-            "drop",
-            key.as_slice(),
-            &[],
-            0,
-        );
-    } else {
-        pipeline.add_ingress_eth_ethertype_entry(
-            "drop",
-            key.as_slice(),
-            &[],
-            0,
-        );
-    }
+    ethtype_only(pipeline, 0x86dd, encap)
 }
 
 fn arp_only(pipeline: &mut main_pipeline, encap: bool) {
-    let mut key = vec![1];
-    key.extend_from_slice(0x806u16.to_le_bytes().as_slice());
-    if encap {
-        pipeline.add_ingress_inner_eth_ethertype_entry(
-            "keep",
-            key.as_slice(),
-            &[],
-            100,
-        );
-    } else {
-        pipeline.add_ingress_eth_ethertype_entry(
-            "keep",
-            key.as_slice(),
-            &[],
-            100,
-        );
-    }
-
-    key[0] = 0;
-    if encap {
-        pipeline.add_ingress_inner_eth_ethertype_entry(
-            "drop",
-            key.as_slice(),
-            &[],
-            0,
-        );
-    } else {
-        pipeline.add_ingress_eth_ethertype_entry(
-            "drop",
-            key.as_slice(),
-            &[],
-            0,
-        );
-    }
+    ethtype_only(pipeline, 0x0806, encap)
 }

@@ -39,15 +39,21 @@ pub fn bv_to_ipv6(bv: BitVec<u8, Msb0>) -> Result<Ipv6Addr> {
     Ok(Ipv6Addr::from(m))
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive)]
+#[derive(
+    Clone, Copy, Debug, Eq, PartialEq, TryFromPrimitive, clap::ValueEnum,
+)]
 #[repr(u16)]
 pub enum Ethertype {
+    #[clap(name = "ipv4")]
     IPv4 = 0x0800,
+    #[clap(name = "ipv6")]
     IPv6 = 0x86dd,
     Arp = 0x0806,
     Wol = 0x0842,
     Vlan = 0x8100,
     Pbr = 0x88A8,
+    Lldp = 0x88CC,
+    #[clap(name = "qnq")]
     QnQ = 0x9100,
     Sidecar = 0x901,
     Ethernet = 0x6558,
