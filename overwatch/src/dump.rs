@@ -722,28 +722,38 @@ pub fn vlan(h: crate::vlan_h) {
 pub fn lldp(data: &[u8]) {
     match lldp::types::Lldpdu::try_from(data) {
         Ok(l) => {
-            println!("\tChassisID: {:?}", l.chassis_id);
-            println!("\tPortId: {:?}", l.port_id);
-            println!("\tTTL:  {} seconds", l.ttl);
+            let label = layer!("Lldp");
+            let space = layer!("");
+            println!("{} {}", label, field!("ChassisID", l.chassis_id));
+            println!("{} {}", space, field!("PortId", l.port_id));
+            println!("{} {}", space, field!("TTL", l.ttl));
             if let Some(s) = &l.port_description {
-                println!("\tPortDescription: {s}");
+                println!("{} {}", space, field!("PortDescription", s));
             }
             if let Some(s) = &l.system_name {
-                println!("\tSystem Name: {s}");
+                println!("{} {}", space, field!("System Name", s));
             }
             if let Some(s) = &l.system_description {
-                println!("\tSystem Description: {s}");
+                println!("{} {}", space, field!("System Description", s));
             }
             if !l.management_addresses.is_empty() {
-                println!("\tManagement addresses:");
+                println!(
+                    "{} {}",
+                    space,
+                    "Management addresses:".to_string().dimmed()
+                );
                 for ma in &l.management_addresses {
-                    println!("\t\t{ma:?}");
+                    println!("{space}\t{ma:?}");
                 }
             }
             if !l.organizationally_specific.is_empty() {
-                println!("\tOrganizationally Specific:");
+                println!(
+                    "{} {}",
+                    space,
+                    "Organizationally Specific:".to_string().dimmed()
+                );
                 for os in &l.organizationally_specific {
-                    println!("\t\t{os}");
+                    println!("{space}\t{os}");
                 }
             }
         }
