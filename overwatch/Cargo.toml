@@ -13,6 +13,7 @@ clap.workspace = true
 colored.workspace = true
 dlpi.workspace = true
 hex.workspace = true
+lldp.workspace = true
 macaddr.workspace = true
 num_enum.workspace = true
 p4-macro.workspace = true

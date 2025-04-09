@@ -532,6 +532,9 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
         sidecar(h.sidecar);
         off += hlen!(sidecar_h);
     }
+    if h.lldp.isValid() {
+        lldp(&frame[off..]);
+    }
     if h.arp.isValid() {
         arp(h.arp);
         off += hlen!(arp_h);
@@ -714,6 +717,48 @@ pub fn vlan(h: crate::vlan_h) {
         field!("dei", dei),
         field!("et", et),
     );
+}
+
+pub fn lldp(data: &[u8]) {
+    match lldp::types::Lldpdu::try_from(data) {
+        Ok(l) => {
+            let label = layer!("Lldp");
+            let space = layer!("");
+            println!("{} {}", label, field!("ChassisID", l.chassis_id));
+            println!("{} {}", space, field!("PortId", l.port_id));
+            println!("{} {}", space, field!("TTL", l.ttl));
+            if let Some(s) = &l.port_description {
+                println!("{} {}", space, field!("PortDescription", s));
+            }
+            if let Some(s) = &l.system_name {
+                println!("{} {}", space, field!("System Name", s));
+            }
+            if let Some(s) = &l.system_description {
+                println!("{} {}", space, field!("System Description", s));
+            }
+            if !l.management_addresses.is_empty() {
+                println!(
+                    "{} {}",
+                    space,
+                    "Management addresses:".to_string().dimmed()
+                );
+                for ma in &l.management_addresses {
+                    println!("{space}\t{ma:?}");
+                }
+            }
+            if !l.organizationally_specific.is_empty() {
+                println!(
+                    "{} {}",
+                    space,
+                    "Organizationally Specific:".to_string().dimmed()
+                );
+                for os in &l.organizationally_specific {
+                    println!("{space}\t{os}");
+                }
+            }
+        }
+        Err(e) => println!("<unable to parse lldp packet: {e}>"),
+    }
 }
 
 pub fn sidecar(h: crate::sidecar_h) {
