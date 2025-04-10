@@ -743,7 +743,7 @@ pub fn lldp(data: &[u8]) {
                     "Management addresses:".to_string().dimmed()
                 );
                 for ma in &l.management_addresses {
-                    println!("{space}\t{ma:?}");
+                    println!("{space}\t{ma}");
                 }
             }
             if !l.organizationally_specific.is_empty() {

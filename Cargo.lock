@@ -1545,7 +1545,7 @@ dependencies = [
 [[package]]
 name = "protocol"
 version = "0.1.0"
-source = "git+https://github.com/oxidecomputer/lldp#d94d0606928d37ecbdc885625e4212655dbecd2a"
+source = "git+https://github.com/oxidecomputer/lldp#e87df311618c42e3662039098b8a4c11c9f0da6a"
 dependencies = [
  "anyhow",
  "schemars",
