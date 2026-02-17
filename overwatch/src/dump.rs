@@ -517,6 +517,7 @@ macro_rules! hlen {
     };
 }
 
+#[allow(unused_assignments)]
 pub fn headers(h: crate::headers_t, frame: &[u8]) {
     let mut off = 0usize;
     let mut v6_start = None;
@@ -622,7 +623,6 @@ pub fn headers(h: crate::headers_t, frame: &[u8]) {
         tcp(h.inner_tcp);
         off += (len << 2) as usize;
     }
-    #[allow(unused_assignments)]
     if h.inner_udp.isValid() {
         udp(h.inner_udp, None);
         off += hlen!(udp_h);

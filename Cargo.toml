@@ -18,13 +18,13 @@ edition = "2021"
 repository = "https://github.com/oxidecomputer/overwatch"
 
 [workspace.dependencies]
-anstyle = "1.0.0"
-anyhow = "1.0.71"
+anstyle = "1.0.13"
+anyhow = "1.0.101"
 bitvec = "1.0.1"
-camino = "1.1"
+camino = "1.2"
 cargo_metadata = "0.19"
-clap = { version = "4.2.5", features = ["derive", "unstable-styles"] }
-colored = "2.0.0"
+clap = { version = "4.5.59", features = ["derive", "unstable-styles"] }
+colored = "2.2.0"
 dlpi = { git = "https://github.com/oxidecomputer/dlpi-sys", version = "0.2.0" }
 hex = "0.4.3"
 indoc = "2"
@@ -34,6 +34,6 @@ num_enum = "0.6.1"
 p4-macro = { git = "https://github.com/oxidecomputer/p4", branch = "main" }
 p4rs = { git = "https://github.com/oxidecomputer/p4", branch = "main" }
 pretty-hex = "0.3.0"
-tokio = { version = "1.43.0", features = ["full"] }
+tokio = { version = "1.49.0", features = ["full"] }
 toml = "0.8"
 usdt = "0.3.5"
